@@ -1,0 +1,121 @@
+/** {*/
+    /*background: black;*/
+    /*color: white;*/
+/*}*/
+
+#login_window {
+    border-top: 4px solid #00b0ff;
+    background-color: white;
+}
+
+#login_window #top_bar {
+    /*background: rgba(0, 0, 0, 0.5);*/
+}
+
+#login_window #close_button {
+    background: transparent;
+    border: none;
+    color: black;
+    transition: 300ms;
+
+    min-width: 20px;
+    min-height: 20px;
+
+    border-radius: 50%;
+
+    margin: 10px;
+}
+
+#login_window #close_button:hover {
+    background: crimson;
+    color: white
+}
+
+#login_window entry {
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid crimson;
+    border-radius: 0;
+}
+
+#login_window #field_username {
+    margin-top: 100px;
+}
+
+#login_window #field_password {
+    margin-top: 40px;
+}
+
+#login_window #field_cfm_password {
+    margin-top: 40px;
+}
+
+#login_window #button_login_switch {
+    background: transparent;
+    border: none;
+    color: black;
+    transition: 300ms;
+
+    min-width: 20px;
+    min-height: 20px;
+
+    border-radius: 50%;
+
+    margin: 10px;
+}
+
+#login_window #button_signup_switch {
+    background: transparent;
+    border: none;
+    color: black;
+    transition: 300ms;
+
+    min-width: 20px;
+    min-height: 20px;
+
+    border-radius: 50%;
+
+    margin: 10px 0;
+}
+
+#login_window #button_login_switch:hover,
+#login_window #button_signup_switch:hover {
+    background: crimson;
+}
+
+#login_window #button_login_confirm,
+#login_window #button_signup_confirm {
+    min-height: 25px;
+    min-width: 25px;
+    margin: 70px 230px 0 230px;
+    background: crimson;
+    transition: 300ms;
+    color: white;
+
+    border-radius: 50%;
+    border: none;
+}
+
+#login_window #button_login_confirm:hover,
+#login_window #button_signup_confirm:hover {
+    box-shadow: crimson 0 0 20px 10px;
+}
+
+#login_window #login_check {
+    min-width: 100px;
+    margin-top: 50px;
+    margin-left: 135px;
+    border: none;
+}
+
+#login_window #label_error {
+    background: #b80700;
+    min-height: 64px;
+    color: white;
+    margin: 0 100px 100px 100px;
+    border-radius: 10px;
+}
+
+/*#login_window #login_check check {*/
+    /*background: transparent;*/
+/*}*/
