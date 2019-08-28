@@ -159,7 +159,10 @@ void LoginWindow::btn_signup_switch_clicked(GtkWidget * widget, gpointer data) {
 void LoginWindow::btn_login_switch_clicked(GtkWidget *widget, gpointer data) {
     auto window = (LoginWindow *)data;
 
-    gtk_widget_hide(window->signup_form);
+    if (window->signup_form) {
+        gtk_widget_hide(window->signup_form);
+    }
+
     gtk_widget_show_all(window->login_form);
 }
 
@@ -176,6 +179,7 @@ void LoginWindow::btn_login_clicked(GtkWidget *widget, gpointer data) {
 
     if (ret) {
         printf("successful\n");
+        window->func();
     } else {
         window->set_error_info("username or password not correct");
         return;
@@ -201,6 +205,7 @@ void LoginWindow::btn_signup_clicked(GtkWidget *widget, gpointer data) {
 
     if (ret) {
         printf("signup successful\n");
+        window->func();
     } else {
         window->set_error_info(info.c_str());
         return;
@@ -210,4 +215,12 @@ void LoginWindow::btn_signup_clicked(GtkWidget *widget, gpointer data) {
 void LoginWindow::set_error_info(const char *info) {
     gtk_widget_set_name(this->label_error, "label_error");
     gtk_label_set_text(GTK_LABEL(this->label_error), info);
+}
+
+LoginWindow * LoginWindow::create() {
+    return new LoginWindow();
+}
+
+void LoginWindow::set_login_success_callback(std::function<void()> && func) {
+    this->func = func;
 }

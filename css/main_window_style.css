@@ -1,0 +1,50 @@
+#main_window {
+    background: white;
+}
+
+#main_window #main_window_top_bar {
+    border-top: 4px solid #00b0ff;
+    background: rgba(0, 0, 0, 0.1);
+}
+
+#main_window #toolbar {
+    /*background: rgba(0, 0, 0, 0.1);*/
+    border-right: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+#main_window #main_window_button_close {
+    min-width: 20px;
+    min-height: 20px;
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    margin: 10px;
+    transition: 300ms;
+}
+
+#main_window #main_window_button_close:hover {
+    background: crimson;
+    color: white;
+}
+
+#main_window #main_window_label_caption {
+    margin-left: 16px;
+}
+
+#main_window #main_window_button_user,
+#main_window #main_window_button_friend {
+    margin-top: 16px;
+    margin-left: 16px;
+    margin-right: 16px;
+    min-width: 20px;
+    min-height: 20px;
+    background: rgba(0, 0, 0, 0.07);
+    border: none;
+    border-radius: 50%;
+    transition: 300ms;
+}
+
+#main_window #main_window_button_user:hover,
+#main_window #main_window_button_friend:hover {
+    background: crimson;
+}

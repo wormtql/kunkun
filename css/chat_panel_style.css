@@ -1,0 +1,87 @@
+#chat_panel {
+    /*background: rgba(0, 0, 0, 0.5);*/
+}
+
+#chat_panel #side_bar {
+    /*background: rgba(0, 0, 0, 0.1);*/
+    min-width: 200px;
+    border-right: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+#chat_panel #chat_panel_side_header {
+    background: #353333;
+    color: white;
+    min-height: 32px;
+}
+
+#chat_panel #side_bar button {
+    min-height: 64px;
+    border: none;
+    background: transparent;
+    transition: 300ms;
+    border-radius: 0;
+}
+
+#chat_panel #side_bar button:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+#chat_panel #side_bar button image {
+    margin: 0 16px;
+    background: transparent;
+}
+
+#chat_panel #chat_panel_body {
+    /*background: rgba(0, 0, 0, 0.2);*/
+}
+
+#chat_panel #chat_panel_chat_body {
+    /*background: red;*/
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    min-height: 300px;
+}
+
+#chat_panel #chat_panel_button_set_1 {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+#chat_panel #chat_panel_button_file,
+#chat_panel #chat_panel_button_image {
+    min-width: 20px;
+    min-height: 20px;
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    margin: 4px 0 4px 8px;
+
+    transition: 300ms;
+}
+
+#chat_panel #chat_panel_button_file:hover,
+#chat_panel #chat_panel_button_image:hover {
+    background: crimson;
+    color: white;
+}
+
+#chat_panel #chat_panel_input_box {
+    padding: 16px;
+
+}
+
+#chat_panel #chat_panel_button_set_2 {
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+#chat_panel #chat_panel_button_send {
+    border: none;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    margin: 8px;
+    transition: 300ms;
+    min-width: 100px;
+}
+
+#chat_panel #chat_panel_button_send:hover {
+    background: crimson;
+    color: white;
+}

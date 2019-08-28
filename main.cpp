@@ -4,13 +4,27 @@
 
 static void activate(GtkApplication * app, gpointer data) {
     CssLoader::getIns()->add_css_global("../css/login_window_style.css");
+    CssLoader::getIns()->add_css_global("../css/main_window_style.css");
+    CssLoader::getIns()->add_css_global("../css/chat_panel_style.css");
 
-    LoginWindow * loginWindow = new LoginWindow();
-    GtkWidget * window = loginWindow->widget();
+    LoginWindow * loginWindow = LoginWindow::create();
+    MainWindow * mainWindow = nullptr;
 
-    gtk_application_add_window(app, GTK_WINDOW(window));
+    loginWindow->set_login_success_callback([=, &mainWindow] () {
+        MainWindow * window = MainWindow::create();
+        mainWindow = window;
 
-    gtk_widget_show_all(window);
+        gtk_application_add_window(app, GTK_WINDOW(window->widget()));
+
+        gtk_widget_show_all(window->widget());
+        gtk_widget_destroy(loginWindow->widget());
+    });
+
+
+    gtk_application_add_window(app, GTK_WINDOW(loginWindow->widget()));
+//    gtk_application_add_window(app, GTK_WINDOW(mainWindow->widget()));
+
+    gtk_widget_show_all(loginWindow->widget());
 }
 
 int main(int argc, char * argv[]) {

@@ -13,14 +13,18 @@ private:
     GtkWidget * top_bar = nullptr;
     GtkWidget * root_box = nullptr;
 
-    GtkWidget * login_form;
-    GtkWidget * signup_form;
+    GtkWidget * login_form = nullptr;
+    GtkWidget * signup_form = nullptr;
 
-    GtkWidget * button_login_switch;
-    GtkWidget * button_signup_switch;
+    GtkWidget * button_login_switch = nullptr;
+    GtkWidget * button_signup_switch = nullptr;
 
-    GtkWidget * label_error;
+    GtkWidget * label_error = nullptr;
 
+    std::function<void ()> func;
+
+
+    LoginWindow();
 
     GtkWidget * create_field(const char * icon_name, const char * icon_id, const char * input_ph, const char * input_id);
 
@@ -37,12 +41,14 @@ private:
     static void btn_signup_clicked(GtkWidget * widget, gpointer data);
 
 public:
-    LoginWindow();
 
+    static LoginWindow * create();
 
     GtkWidget * widget();
 
     void set_error_info(const char * info);
+
+    void set_login_success_callback(std::function<void ()> && func);
 };
 
 #endif //HOMEWORK_LOGIN_WINDOW_H

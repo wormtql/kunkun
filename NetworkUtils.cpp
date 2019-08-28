@@ -8,8 +8,8 @@
 
 
 bool NetworkUtils::login(const std::string &username, const std::string &pw, std::string &ret) {
-//    return true;
-    return false;
+    return true;
+//    return false;
 }
 
 bool NetworkUtils::signup(const std::string &username, const std::string &pw, const std::string &cfm_pw,
