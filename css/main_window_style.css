@@ -32,7 +32,8 @@
 }
 
 #main_window #main_window_button_user,
-#main_window #main_window_button_friend {
+#main_window #main_window_button_friend,
+#main_window #main_window_button_add_friend {
     margin-top: 16px;
     margin-left: 16px;
     margin-right: 16px;
@@ -45,6 +46,7 @@
 }
 
 #main_window #main_window_button_user:hover,
-#main_window #main_window_button_friend:hover {
+#main_window #main_window_button_friend:hover,
+#main_window #main_window_button_add_friend:hover {
     background: crimson;
 }
