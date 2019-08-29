@@ -15,6 +15,7 @@ UserPanel::UserPanel() {
     gtk_widget_set_name(root, "user_panel");
     gtk_container_add(GTK_CONTAINER(root_scroll), root);
 
+
 }
 
 UserPanel * UserPanel::create() {
