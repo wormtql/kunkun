@@ -9,12 +9,26 @@
 Client::Client(){}
 
 /****************************************************
+* Description : translate char* to int
+* Prameter    : None
+* Return      : None
+* Date        : 2019.8.28
+****************************************************/
+int Client::string_to_int(char *s) {
+    int len = strlen(s);
+    int res = 0;
+    for(int i = 0; i < len; i++ ){
+        res = res*10+s[i]-'0';
+    }
+    return res;
+}
+/****************************************************
 * Description : init 'pin' and 'msg' and 'buf' and 'ip' and 'port
 * Prameter    : None
 * Return      : None
 * Date        : 2019.8.28
 ****************************************************/
-void Client::init(int port, const char * ip) {
+void Client::init(int port, const char * ip){
     strcpy(this->server_ip, ip);
     bzero(&pin,sizeof(pin));    //init 0
     pin.sin_family = AF_INET;
