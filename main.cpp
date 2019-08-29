@@ -6,6 +6,7 @@ static void activate(GtkApplication * app, gpointer data) {
     CssLoader::getIns()->add_css_global("../css/login_window_style.css");
     CssLoader::getIns()->add_css_global("../css/main_window_style.css");
     CssLoader::getIns()->add_css_global("../css/chat_panel_style.css");
+    CssLoader::getIns()->add_css_global("../css/user_panel_style.css");
 
     LoginWindow * loginWindow = LoginWindow::create();
     MainWindow * mainWindow = nullptr;

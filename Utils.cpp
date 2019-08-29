@@ -35,3 +35,30 @@ GtkWidget * Utils::find_child(GtkWidget *parent, const char *name) {
 
     return nullptr;
 }
+
+void Utils::add_css_class(GtkWidget *widget, const char *name) {
+    GtkStyleContext * context = gtk_widget_get_style_context(widget);
+
+    gtk_style_context_add_class(context, name);
+}
+
+void Utils::remove_css_class(GtkWidget *widget, const char *name) {
+    GtkStyleContext * context = gtk_widget_get_style_context(widget);
+
+    gtk_style_context_remove_class(context, name);
+}
+
+GdkPixbuf * Utils::get_clipped_image(GdkPixbuf *image, int radius) {
+    cairo_surface_t * surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,radius,radius);
+    cairo_t * cr = cairo_create(surface);
+
+    int height = gdk_pixbuf_get_height(image);
+    int width = gdk_pixbuf_get_width(image);
+
+    gdk_cairo_set_source_pixbuf(cr, image, width / 2.0 - radius, height / 2.0 - radius);
+    cairo_arc(cr, radius / 2.0, radius / 2.0, radius, 0, 2 * M_PI);
+    cairo_clip(cr);
+    cairo_paint(cr);
+
+    return gdk_pixbuf_get_from_surface(surface, 0, 0, radius, radius);
+}

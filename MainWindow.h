@@ -18,6 +18,8 @@ private:
     GtkWidget * current_page = nullptr;
 
     ChatPanel * chat_panel = nullptr;
+    UserPanel * user_panel = nullptr;
+    AddFriendPanel * add_friend_panel = nullptr;
 
 
     MainWindow();
@@ -31,6 +33,10 @@ private:
     static void on_button_user_clicked(GtkWidget * widget, gpointer data);
 
     static void on_button_friend_clicked(GtkWidget * widget, gpointer data);
+
+    static void on_button_add_friend_clicked(GtkWidget * widget, gpointer data);
+
+    static void on_button_console_clicked(GtkWidget * widget, gpointer data);
 
 public:
     static MainWindow * create();

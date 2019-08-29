@@ -7,7 +7,17 @@
 
 
 class UserPanel {
+private:
 
+    GtkWidget * root_scroll = nullptr;
+    GtkWidget * root = nullptr;
+
+    UserPanel();
+
+public:
+    static UserPanel * create();
+
+    GtkWidget * widget();
 };
 
 

@@ -10,9 +10,9 @@ ChatPanel::ChatPanel() {
     this->root = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_widget_set_name(root, "chat_panel");
 
-    this->side_bar = create_side_bar();
+    GtkWidget * temp_scroll = create_side_bar();
 
-    gtk_box_pack_start(GTK_BOX(root), side_bar, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(root), temp_scroll, FALSE, FALSE, 0);
 
     this->body = create_body();
 
@@ -27,37 +27,29 @@ ChatPanel* ChatPanel::create() {
     return new ChatPanel();
 }
 
+
+/*
+ * function: create friends list
+ *
+ */
 GtkWidget* ChatPanel::create_side_bar() {
 //    side_bar = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 //    side_bar = gtk_list_box_new();
-    side_bar = gtk_scrolled_window_new(nullptr, nullptr);
-    GtkWidget * box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    GtkWidget * temp_scroll = gtk_scrolled_window_new(nullptr, nullptr);
+    side_bar = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 
-    gtk_widget_set_name(side_bar, "side_bar");
-    gtk_container_add(GTK_CONTAINER(side_bar), box);
-
-    GtkWidget * label = gtk_label_new("my friends");
-    gtk_widget_set_name(label, "chat_panel_side_header");
-    gtk_box_pack_start(GTK_BOX(box), label, FALSE, FALSE, 0);
-
-//    gtk_list_box_prepend(GTK_LIST_BOX(side_bar), label);
-
-    gtk_box_pack_start(GTK_BOX(box), create_side_item(nullptr, "worm"), FALSE, FALSE, 0);
-    gtk_box_pack_start(GTK_BOX(box), create_side_item(nullptr, "worm"), FALSE, FALSE, 0);
-    gtk_box_pack_start(GTK_BOX(box), create_side_item(nullptr, "worm"), FALSE, FALSE, 0);
-    gtk_box_pack_start(GTK_BOX(box), create_side_item(nullptr, "worm"), FALSE, FALSE, 0);
-    gtk_box_pack_start(GTK_BOX(box), create_side_item(nullptr, "worm"), FALSE, FALSE, 0);
-    gtk_box_pack_start(GTK_BOX(box), create_side_item(nullptr, "worm"), FALSE, FALSE, 0);
-    gtk_box_pack_start(GTK_BOX(box), create_side_item(nullptr, "worm"), FALSE, FALSE, 0);
-    gtk_box_pack_start(GTK_BOX(box), create_side_item(nullptr, "worm"), FALSE, FALSE, 0);
-    gtk_box_pack_start(GTK_BOX(box), create_side_item(nullptr, "worm"), FALSE, FALSE, 0);
-    gtk_box_pack_start(GTK_BOX(box), create_side_item(nullptr, "worm"), FALSE, FALSE, 0);
+    gtk_widget_set_name(temp_scroll, "side_bar");
+    gtk_container_add(GTK_CONTAINER(temp_scroll), side_bar);
 
 
-
-    return side_bar;
+    return temp_scroll;
 }
 
+
+/*
+ * function: create single friend item widget
+ *
+ */
 GtkWidget* ChatPanel::create_side_item(GdkPixbuf *pixbuf, const char *name) {
     GtkWidget * image;
 
@@ -67,12 +59,14 @@ GtkWidget* ChatPanel::create_side_item(GdkPixbuf *pixbuf, const char *name) {
 //        image = gtk_image_new_from_icon_name("go-up", GTK_ICON_SIZE_BUTTON);
 
         auto pix = gdk_pixbuf_new_from_file_at_size("../assets/test.jpg", 48, 48, nullptr);
+        pix = Utils::get_clipped_image(pix, 48);
         
         image = gtk_image_new_from_pixbuf(pix);
     }
     GtkWidget * label = gtk_label_new(name);
 
     GtkWidget * button = gtk_button_new();
+    Utils::add_css_class(button, "worm");
 
     GtkWidget * box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_box_pack_start(GTK_BOX(box), image, FALSE, FALSE, 0);
@@ -80,9 +74,16 @@ GtkWidget* ChatPanel::create_side_item(GdkPixbuf *pixbuf, const char *name) {
 
     gtk_container_add(GTK_CONTAINER(button), box);
 
+    g_signal_connect(button, "clicked", G_CALLBACK(ChatPanel::on_button_side_item_clicked), this);
+
     return button;
 }
 
+
+/*
+ * function: create chat body
+ *
+ */
 GtkWidget* ChatPanel::create_body() {
     body = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_name(body, "chat_panel_body");
@@ -147,5 +148,59 @@ void ChatPanel::on_button_image_clicked(GtkWidget *widget, gpointer data) {
 }
 
 void ChatPanel::on_button_send_clicked(GtkWidget *widget, gpointer data) {
+    auto panel = (ChatPanel *)data;
 
+    panel->create_all_side_items();
+}
+
+void ChatPanel::create_all_side_items() {
+    GtkWidget * label = gtk_label_new("my friends");
+    gtk_widget_set_name(label, "chat_panel_side_header");
+    gtk_box_pack_start(GTK_BOX(side_bar), label, FALSE, FALSE, 0);
+
+//    gtk_list_box_prepend(GTK_LIST_BOX(side_bar), label);
+
+    for (int i = 0; i < 10; i++) {
+        char buf[10] = {0};
+        sprintf(buf, "kun%d", i);
+        gtk_box_pack_start(GTK_BOX(side_bar), create_side_item(nullptr, buf), FALSE, FALSE, 0);
+    }
+
+//    gtk_box_pack_start(GTK_BOX(side_bar), create_side_item(nullptr, "worm"), FALSE, FALSE, 0);
+//
+//    gtk_box_pack_start(GTK_BOX(side_bar), create_side_item(nullptr, "worm"), FALSE, FALSE, 0);
+//    gtk_box_pack_start(GTK_BOX(side_bar), create_side_item(nullptr, "worm"), FALSE, FALSE, 0);
+//    gtk_box_pack_start(GTK_BOX(side_bar), create_side_item(nullptr, "worm"), FALSE, FALSE, 0);
+//    gtk_box_pack_start(GTK_BOX(side_bar), create_side_item(nullptr, "worm"), FALSE, FALSE, 0);
+//    gtk_box_pack_start(GTK_BOX(side_bar), create_side_item(nullptr, "worm"), FALSE, FALSE, 0);
+//    gtk_box_pack_start(GTK_BOX(side_bar), create_side_item(nullptr, "worm"), FALSE, FALSE, 0);
+//    gtk_box_pack_start(GTK_BOX(side_bar), create_side_item(nullptr, "worm"), FALSE, FALSE, 0);
+//    gtk_box_pack_start(GTK_BOX(side_bar), create_side_item(nullptr, "worm"), FALSE, FALSE, 0);
+
+    gtk_widget_show_all(side_bar);
+}
+
+void ChatPanel::on_button_side_item_clicked(GtkWidget *widget, gpointer data) {
+    auto panel = (ChatPanel *)data;
+
+    if (panel->current_friend) {
+        Utils::remove_css_class(panel->current_friend, "chosen_friend");
+        Utils::add_css_class(panel->current_friend, "worm");
+    }
+    panel->current_friend = widget;
+    Utils::remove_css_class(panel->current_friend, "worm");
+    Utils::add_css_class(panel->current_friend, "chosen_friend");
+
+
+    GtkWidget * box = gtk_bin_get_child(GTK_BIN(widget));
+    GtkWidget * label = nullptr;
+    GList * list = gtk_container_get_children(GTK_CONTAINER(box));
+    while (list) {
+        if (GTK_IS_LABEL(list->data)) {
+            label = (GtkWidget *)list->data;
+        }
+        list = list->next;
+    }
+
+    printf("%s\n", gtk_label_get_text(GTK_LABEL(label)));
 }

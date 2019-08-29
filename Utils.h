@@ -11,6 +11,12 @@ public:
     static void set_css_id(GtkWidget * widget, const char * name);
 
     static GtkWidget * find_child(GtkWidget * parent, const char * name);
+
+    static void add_css_class(GtkWidget * widget, const char * name);
+
+    static void remove_css_class(GtkWidget * widget, const char * name);
+
+    static GdkPixbuf * get_clipped_image(GdkPixbuf * image, int radius);
 };
 
 

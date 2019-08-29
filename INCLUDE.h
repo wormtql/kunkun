@@ -6,6 +6,7 @@
 #define HOMEWORK_INCLUDE_H
 
 #include <gtk/gtk.h>
+#include <cairo.h>
 
 #include <string>
 #include <cstring>
@@ -23,6 +24,7 @@
 #include "NetworkUtils.h"
 #include "ChatPanel.h"
 #include "UserPanel.h"
+#include "AddFriendPanel.h"
 #include "MainWindow.h"
 
 

@@ -30,6 +30,9 @@ private:
     GtkTextBuffer * input_box_buffer = nullptr;
 
 
+    GtkWidget * current_friend = nullptr;
+
+
     ChatPanel();
 
     GtkWidget * create_side_bar();
@@ -49,6 +52,8 @@ private:
     static void on_button_image_clicked(GtkWidget * widget, gpointer data);
 
     static void on_button_send_clicked(GtkWidget * widget, gpointer data);
+
+    static void on_button_side_item_clicked(GtkWidget * widget, gpointer data);
 
 public:
     static ChatPanel * create();

@@ -14,7 +14,7 @@
     min-height: 32px;
 }
 
-#chat_panel #side_bar button {
+#chat_panel #side_bar button.worm {
     min-height: 64px;
     border: none;
     background: transparent;
@@ -22,8 +22,17 @@
     border-radius: 0;
 }
 
-#chat_panel #side_bar button:hover {
-    background: rgba(0, 0, 0, 0.1);
+#chat_panel #side_bar button.chosen_friend {
+    min-height: 64px;
+    border: none;
+    background: crimson;
+    color: white;
+    transition: 300ms;
+    border-radius: 0;
+}
+
+#chat_panel #side_bar button.worm:hover {
+    background: rgba(181, 86, 86, 0.48);
 }
 
 #chat_panel #side_bar button image {
@@ -85,3 +94,11 @@
     background: crimson;
     color: white;
 }
+
+/*#chat_panel .chosen_friend {*/
+    /*min-height: 64px;*/
+    /*border: none;*/
+    /*background: crimson;*/
+    /*transition: 300ms;*/
+    /*border-radius: 0;*/
+/*}*/
