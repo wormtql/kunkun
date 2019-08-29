@@ -14,6 +14,14 @@
 #include <fstream>
 #include <vector>
 #include <functional>
+#include <cctype>
+#include <cstdlib>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 #include "json.hpp"
 
@@ -21,7 +29,7 @@
 #include "Utils.h"
 #include "CssLoader.h"
 #include "LoginWindow.h"
-#include "NetworkUtils.h"
+#include "Client.h"
 #include "ChatPanel.h"
 #include "UserPanel.h"
 #include "AddFriendPanel.h"
