@@ -139,4 +139,30 @@ int Client::initialize_net(int Port, const char *ip) {
     if(Client::getIns()->connect_to_server() == 0)return 0;
     return 1;
 }
-
+/****************************************************
+ * Description : send file to server
+ * Prameter    : filename
+ * Return      : int : 1 success  0 failed
+ * Date        : 2019.8.29
+ * Ps          : without test!!!!
+ ****************************************************/
+int Client::send_file_from_file(const std::string &filename) {
+    FILE *fp = fopen(filename.c_str(),"r");
+    if(fp == NULL){
+        perror("Failed to open file.");
+        return 0;
+    }
+    int block_length;
+    char file_buf[FILE_BLOCK_SIZE];
+    bzero(file_buf,sizeof(file_buf));
+    while((block_length = fread(file_buf, sizeof(char),BUF_SIZE,fp)) > 0){
+        if(Client::getIns()->send_msg(file_buf) == 0){
+            perror("Failed to send file block.");
+            return 0;
+        }
+        printf("Successfully send %dByte to server.  --File : %s-- ",block_length,filename.c_str());
+        bzero(file_buf,sizeof(file_buf));
+    }
+    printf("Finished transfer File : %s.",filename.c_str());
+    return 1;
+}

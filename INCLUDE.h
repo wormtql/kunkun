@@ -37,5 +37,6 @@
 
 #define BUF_SIZE 256
 #define MSG_SIZE 256
+#define FILE_BLOCK_SIZE 256
 
 #endif //HOMEWORK_INCLUDE_H
