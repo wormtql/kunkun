@@ -21,11 +21,11 @@ private:
     GtkWidget * create_user_sign_field();
     GtkWidget * create_gender_field();
 
-    static void on_user_name_enter(GtkWidget * widget, gpointer data);
+    static int on_user_name_enter(GtkWidget * widget, gpointer data);
 
-    static void on_sign_enter(GtkWidget * widget, gpointer data);
+    static int on_sign_enter(GtkWidget * widget, gpointer data);
 
-    static void on_gender_enter(GtkWidget * widget, gpointer data);
+    static int on_gender_enter(GtkWidget * widget, gpointer data);
 
 
 public:

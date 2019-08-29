@@ -53,6 +53,7 @@ GtkWidget* UserPanel::create_user_name_field() {
     GtkWidget * entry = gtk_entry_new();
     Utils::add_css_class(entry, "user_panel_entry");
     g_signal_connect(entry, "activate", G_CALLBACK(UserPanel::on_user_name_enter), this);
+    g_signal_connect(entry, "focus-out-event", G_CALLBACK(UserPanel::on_user_name_enter), this);
     gtk_box_pack_end(GTK_BOX(box), entry, FALSE, FALSE, 0);
 
     return box;
@@ -90,14 +91,16 @@ GtkWidget* UserPanel::create_gender_field() {
     return box;
 }
 
-void UserPanel::on_user_name_enter(GtkWidget *widget, gpointer data) {
+int UserPanel::on_user_name_enter(GtkWidget *widget, gpointer data) {
     printf("enter\n");
+
+    return GDK_EVENT_PROPAGATE;
 }
 
-void UserPanel::on_sign_enter(GtkWidget *widget, gpointer data) {
-
+int UserPanel::on_sign_enter(GtkWidget *widget, gpointer data) {
+    return GDK_EVENT_PROPAGATE;
 }
 
-void UserPanel::on_gender_enter(GtkWidget *widget, gpointer data) {
-
+int UserPanel::on_gender_enter(GtkWidget *widget, gpointer data) {
+    return GDK_EVENT_PROPAGATE;
 }

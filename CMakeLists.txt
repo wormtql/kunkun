@@ -11,6 +11,6 @@ include_directories(${GTK3_INCLUDE_DIRS})
 
 add_definitions(${GTK3_CFLAGS_OTHER})
 
-add_executable(kunkun main.cpp LoginWindow.h LoginWindow.cpp CssLoader.cpp CssLoader.h INCLUDE.h Utils.cpp Utils.h Client.cpp Client.h MainWindow.cpp MainWindow.h ChatPanel.cpp ChatPanel.h json.hpp UserPanel.cpp UserPanel.h AddFriendPanel.cpp AddFriendPanel.h)
+add_executable(kunkun main.cpp LoginWindow.h LoginWindow.cpp CssLoader.cpp CssLoader.h INCLUDE.h Utils.cpp Utils.h Client.cpp Client.h MainWindow.cpp MainWindow.h ChatPanel.cpp ChatPanel.h json.hpp UserPanel.cpp UserPanel.h AddFriendPanel.cpp AddFriendPanel.h ClientUtils.cpp ClientUtils.h)
 
 target_link_libraries(kunkun ${GTK3_LIBRARIES})

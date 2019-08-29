@@ -26,6 +26,9 @@
 #include "json.hpp"
 
 
+typedef std::function<void (const std::string &)> SocketCallback;
+
+
 #include "Utils.h"
 #include "CssLoader.h"
 #include "LoginWindow.h"
@@ -34,6 +37,7 @@
 #include "UserPanel.h"
 #include "AddFriendPanel.h"
 #include "MainWindow.h"
+#include "ClientUtils.h"
 
 
 #endif //HOMEWORK_INCLUDE_H
