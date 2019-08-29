@@ -175,7 +175,8 @@ void LoginWindow::btn_login_clicked(GtkWidget *widget, gpointer data) {
     std::string password = gtk_entry_get_text(GTK_ENTRY(Utils::find_child(window->widget(), "entry_login_pw")));
 
     std::string info;
-    bool ret = NetworkUtils::login(username, password, info);
+//    bool ret = Client::login(username, password, info);
+    bool ret = true;
 
     if (ret) {
         printf("successful\n");
@@ -201,8 +202,8 @@ void LoginWindow::btn_signup_clicked(GtkWidget *widget, gpointer data) {
     }
 
     std::string info;
-    bool ret = NetworkUtils::signup(username, password, cfm_password, info);
-
+    //bool ret = Client::signup(username, password, cfm_password, info);
+    bool ret = false;
     if (ret) {
         printf("signup successful\n");
         window->func();
