@@ -39,5 +39,7 @@ typedef std::function<void (const std::string &)> SocketCallback;
 #include "MainWindow.h"
 #include "ClientUtils.h"
 
+#define BUF_SIZE 256
+#define MSG_SIZE 256
 
 #endif //HOMEWORK_INCLUDE_H
