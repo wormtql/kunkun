@@ -125,3 +125,4 @@ int Client::initialize_net(int Port, const char *ip) {
     if(Client::getIns()->connect_to_server() == 0)return 0;
     return 1;
 }
+
