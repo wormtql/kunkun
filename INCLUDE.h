@@ -35,5 +35,7 @@
 #include "AddFriendPanel.h"
 #include "MainWindow.h"
 
+#define BUF_SIZE 256
+#define MSG_SIZE 256
 
 #endif //HOMEWORK_INCLUDE_H
