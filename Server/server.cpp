@@ -51,9 +51,9 @@ bool check_login( const json recv_msg )
     // check login with map
     if( username_to_fd.find( username ) != username_to_fd.end() )
     {
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 
 bool check_password( const json recv_msg )
@@ -64,6 +64,11 @@ bool check_password( const json recv_msg )
 
     //check_password with mysql ... mzh
 
+}
+
+bool check_username_exist( const string username )
+{
+    //check_username_exist with mysql ... mzh
 }
 
 json init_return_json( json recv_msg )
@@ -80,7 +85,6 @@ json init_return_json( json recv_msg )
 void process_msg( json recv_msg, int fd )
 {
     json return_msg = init_return_json( recv_msg );
-    char buf[BUFSIZE] = {0};
     if( recv_msg["command"] == "login" ) // login
     { 
         bool already_login = check_login( recv_msg );
@@ -97,6 +101,7 @@ void process_msg( json recv_msg, int fd )
                 username_to_fd[username] = fd;
                 fd_to_username[fd] = username;
                 return_msg["status"] = true;
+                printf("%s log in\n", username.data());
             }
             else
             {
@@ -106,10 +111,34 @@ void process_msg( json recv_msg, int fd )
     }
     else if( recv_msg["command"] == "signup" )
     {
+        bool username_exist = check_username_exist( recv_msg["username"] );
+        if( username_exist )
+        {
+            return_msg["msg"] = recv_msg["username"] + " had log in";
+        }
+        else
+        {
+            string username = recv_msg["username"];
+            username_to_fd[username] = fd;
+            fd_to_username[fd] = username;
+            return_msg["status"] = true;
+            printf("%s sign up\n", username.data());
+        }
+    }
+    else if( recv_msg["command"] == "create_group")
+    {
 
     }
 
-    string 
+    // send massage to client
+    string s = return_msg.dump();
+    char *buf = s.data();
+    int ret = send(fd, buf, sizeof(buf), 0);
+    if (ret == -1) {
+        printf("send fail\n");
+    } else {
+        printf("send complete\n");
+    }
     //
 
 }
