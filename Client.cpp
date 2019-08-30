@@ -218,7 +218,7 @@ int Client::initialize_net() {
 int Client::send_file_from_file(const std::string &filename) {
     FILE *fp = fopen(filename.c_str(),"r");
     if(fp == NULL){
-        perror("Failed to open file.");
+        perror("Failed to open file.\n");
         return 0;
     }
     int block_length;
@@ -226,13 +226,13 @@ int Client::send_file_from_file(const std::string &filename) {
     bzero(file_buf,sizeof(file_buf));
     while((block_length = fread(file_buf, sizeof(char),BUF_SIZE,fp)) > 0){
         if(Client::getIns()->send_msg(file_buf) == 0){
-            perror("Failed to send file block.");
+            perror("Failed to send file block.\n");
             return 0;
         }
-        printf("Successfully send %dByte to server.  --File : %s-- ",block_length,filename.c_str());
+        printf("Successfully send %dByte to server.  --File : %s-- \n",block_length,filename.c_str());
         bzero(file_buf,sizeof(file_buf));
     }
-    printf("Finished transfer File : %s.",filename.c_str());
+    printf("Finished transfer File : %s.\n",filename.c_str());
     return 1;
 }
 
