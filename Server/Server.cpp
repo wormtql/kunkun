@@ -16,6 +16,7 @@
 #include <pthread.h>
 #include <sys/shm.h>
 #include <time.h>
+#include "json.hpp"
 
 #define MYPORT    8000                          //server's listen port
 #define PORT      8081                          //the begin of srever's chat port
@@ -66,14 +67,14 @@ void* _pthread_entrance(void* p)
         recv_len=recv(current_user_sockfd,buf,BUFSIZE,0);    //reserve log request
         g_print("%d %s\n",recv_len, buf);
 
-        if(recv_len<=0)
-        {
+        if(recv_len<=0) {
             userNum--;
-            memset(online_user[current_user_ID],0,sizeof(online_user[0]));
-            ary_sockfd[current_user_ID]=0;
+            memset(online_user[current_user_ID], 0, sizeof(online_user[0]));
+            ary_sockfd[current_user_ID] = 0;
             close(current_user_sockfd);
             return NULL;
         }
+        if
 
     }
 }
