@@ -81,5 +81,64 @@ send_add_friend_request
         "msg": "..."
     }
 
+chat_send_file
+    recv:
+    {
+        "command": "chat_send_file",
+        "filename": "[filename]",
+        "from": "[username]",
+        "to": "[username]",
+    }
+    return:
+    {
+        "command": "chat_send_file",
+        "status": [true | false],
+        "msg": "..."
+    }
+
+chat_recv_file
+    recv:
+    {
+        "command": "chat_recv_file",
+        "filename": "[filename]",
+        "from": "[username]",
+        "to": "[username]",
+    }
+    return:
+    {
+        "command": "chat_recv_file",
+        "status": [true | false],
+        "msg": "..."
+    }
+
+group_send_file
+    recv:
+    {
+        "command": "group_send_file",
+        "filename": "[filename]",
+        "from": "[username]",
+        "group": "[groupid]",
+    }
+    return:
+    {
+        "command": "group_send_file",
+        "status": [true | false],
+        "msg": "..."
+    }
+
+group_recv_file
+    recv:
+    {
+        "command": "group_recv_file",
+        "filename": "[filename]",
+        "from": "[username]",
+        "group": "[groupid]",
+    }
+    return:
+    {
+        "command": "group_recv_file",
+        "status": [true | false],
+        "msg": "..."
+    }
 
 ...
