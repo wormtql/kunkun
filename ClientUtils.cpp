@@ -5,8 +5,14 @@
 #include "INCLUDE.h"
 #include "ClientUtils.h"
 
-void ClientUtils::login(const std::string &username, const std::string &password, bool & finished, SocketCallback callback) {
-    finished = false;
+void ClientUtils::login(const std::string &username, const std::string &password, SocketCallback callback) {
+    Thread::set_call_back(callback);
 
+    json j;
 
+    j["command"] = "login";
+    j["username"] = username;
+    j["password"] = password;
+
+    Client::getIns()->send_string(j.dump());
 }
