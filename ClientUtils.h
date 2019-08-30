@@ -26,6 +26,21 @@ public:
     static json alter_user_info(const std::string & who, const std::string & field, const std::string new_val);
 
 
+    static std::string get_user_info(const std::string & who, const std::string & field)
+
+
+    /*
+     * 获得用户名包含query_str的用户列表
+     *
+     */
+    static json get_list_user_like(const std::string & query_str);
+
+
+    static json get_list_user_like(const std::string & query_str);
+
+
+
+
 
     // todo ...
 };

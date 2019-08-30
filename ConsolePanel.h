@@ -16,6 +16,12 @@ private:
 
     ConsolePanel();
 
+    static gboolean on_key_pressed(GtkWidget * widget, GdkEventKey * event, gpointer data);
+
+    void process_command(const std::string & cmd);
+
+    void my_print(const std::string & str);
+
 public:
     static ConsolePanel * create();
 

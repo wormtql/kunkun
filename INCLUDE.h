@@ -12,6 +12,7 @@
 #include <cstring>
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 #include <vector>
 #include <functional>
 #include <cctype>

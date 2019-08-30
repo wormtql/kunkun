@@ -31,7 +31,7 @@ map<int, string> fd_to_username;
 map<string, int> username_to_fd;
 // alive socket
 vector<int> alive_socket;
-int lock = 0;
+GMutex mutex;
 
 
 const char debug_str[100] = "{\"debug\":true}";
@@ -43,8 +43,7 @@ void * thread_func(void * data) {
 
     while (1) {
         // require lock;
-        while (lock == 1);
-        lock = 1;
+        g_mutex_lock(&mutex);
 
         auto iter = alive_socket.begin();
         while (iter != alive_socket.end()) {
@@ -80,7 +79,7 @@ void * thread_func(void * data) {
             iter++;
         }
 
-        lock = 0;
+        g_mutex_unlock(&mutex);
     }
 }
 
@@ -126,10 +125,11 @@ int main(int argc, char * argv[]) {
 
             // add alive socket
 
-            while (lock == 1);
-            lock = 1;
+            // while (lock == 1);
+            g_mutex_lock(&mutex);
             alive_socket.push_back(new_socketfd);
-            lock = 0;
+            g_mutex_unlock(&mutex);
+            // lock = 0;
 	    }
 
         // if (recv(new_socketfd, buf, 200, 0) == -1) {

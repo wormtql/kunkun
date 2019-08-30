@@ -8,11 +8,23 @@
 
 ConsolePanel::ConsolePanel() {
     root = gtk_scrolled_window_new(nullptr, nullptr);
+    gtk_widget_set_name(root, "console_panel");
 
     text_view = gtk_text_view_new();
+    gtk_widget_set_name(text_view, "text_view");
+    g_signal_connect(text_view, "key-press-event", G_CALLBACK(ConsolePanel::on_key_pressed), this);
     text_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text_view));
 
-    
+    gtk_text_buffer_set_text(text_buffer, ">>> ", 4);
+
+    gtk_container_add(GTK_CONTAINER(root), text_view);
+
+//    GtkTextIter * iter = nullptr;
+//    gtk_text_view_get_iter_at_location(GTK_TEXT_VIEW(text_view), iter, 0, 0);
+
+//    char temp[] = "<p style=\"color:red;\">ajdad</p>";
+
+//    gtk_text_buffer_insert_markup(text_buffer, iter, temp, sizeof(temp));
 }
 
 ConsolePanel* ConsolePanel::create() {
@@ -22,4 +34,111 @@ ConsolePanel* ConsolePanel::create() {
 
 GtkWidget* ConsolePanel::widget() {
     return root;
+}
+
+gboolean ConsolePanel::on_key_pressed(GtkWidget *widget, GdkEventKey *event, gpointer data) {
+    auto window = (ConsolePanel *)data;
+
+    if (strcmp(gdk_keyval_name(event->keyval), "Return") == 0) {
+        int line_count = gtk_text_buffer_get_line_count(window->text_buffer);
+
+        GtkTextIter start;
+        GtkTextIter end;
+        gtk_text_buffer_get_iter_at_line(window->text_buffer, &start, line_count - 1);
+        gtk_text_buffer_get_iter_at_line(window->text_buffer, &end, 1000000);
+
+        char * text = gtk_text_iter_get_text(&start, &end);
+
+        std::string command;
+        int len = (int)strlen(text);
+        for (int i = 0; i < len; i++) {
+            if (text[i] != '>') {
+                command.push_back(text[i]);
+                if (command == " ") {
+                    command = "";
+                }
+            }
+        }
+
+        window->my_print("\n");
+        window->process_command(command);
+        window->my_print(">>> ");
+
+        return true;
+    }
+
+    return false;
+//    return true;
+}
+
+void ConsolePanel::my_print(const std::string &str) {
+    GtkTextIter end;
+    gtk_text_buffer_get_iter_at_line(text_buffer, &end, 100000);
+    gtk_text_buffer_insert(text_buffer, &end, str.c_str(), sizeof(char) * str.size());
+}
+
+void ConsolePanel::process_command(const std::string &cmd) {
+    std::vector<std::string> argv;
+    argv.emplace_back("");
+    int argc = 1;
+
+    for (char c : cmd) {
+        if (c == ' ')
+        {
+            argc++;
+            argv.emplace_back("");
+        }
+        else
+        {
+            argv[argc - 1].push_back(c);
+        }
+    }
+
+
+    // todo
+    // parse argument here
+    if (argv[0] == "del")
+    {
+
+    }
+    else if (argv[0] == "set")
+    {
+
+    }
+    else if (argv[0] == "get")
+    {
+
+    }
+    else if (argv[0] == "set")
+    {
+
+    }
+    else if (argv[0] == "ls")
+    {
+
+    }
+    else if (argv[0] == "msg")
+    {
+
+    }
+    else if (argv[0] == "req")
+    {
+
+    }
+    else if (argv[0] == "rec")
+    {
+
+    }
+    else if (argv[0] == "dec")
+    {
+
+    }
+    else if (argv[0] == "clear")
+    {
+        gtk_text_buffer_set_text(text_buffer, "", 0);
+    }
+    else
+    {
+        my_print("unrecognized command " + argv[0] + "\n");
+    }
 }

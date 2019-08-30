@@ -92,4 +92,41 @@ alter_user_info
         "msg": ...
     }
 
+list_user_like
+    recv:
+    {
+        "command": "...",
+        "query_str": "...",
+    }
+    return:
+    {
+        command: "...",
+        status: "...",
+        list:
+        [
+            "[user1]",
+            "[user2]",
+            ...
+        ]
+    }
+
+list_group_like
+    recv:
+    {
+        "command": "...",
+        "query_str": "...",
+    }
+    return:
+    {
+        "command": "...",
+        "status": "...",
+        list:
+        [
+            "[group1]",
+            "[group2]",
+            ...
+        ]
+    }
+
+
 ...
