@@ -31,6 +31,7 @@ signup:
         "command": "signup",
         "status": [true | false],
         // 错误信息
+        // 检测是否已经被注册等等
         "msg": "..."
     }
 
@@ -56,10 +57,29 @@ rename_group:
         "command": "rename_group",
         // 需检测是否为创建者
         "who": "[username]",
-        "group_name": "..."
+        "group_id": "...",
+        "new_name": "..."
     }
     return:
     {
         "command": "rename_group",
-        "status"
+        "status": [true | false],
+        "msg": "..."
     }
+
+send_add_friend_request
+    recv:
+    {
+        "command": "send_add_friend_request",
+        "from": "[username]",
+        "to": "[username]",
+    }
+    return:
+    {
+        "command": "send_add_friend_request",
+        "status": [true | false],
+        "msg": "..."
+    }
+
+
+...
