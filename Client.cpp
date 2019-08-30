@@ -35,6 +35,7 @@ void Client::init(){
     pin.sin_addr.s_addr = htonl(INADDR_ANY);
     pin.sin_port = htons(SERVER_PORT);
     buf = (char*)malloc(sizeof(char) * BUF_SIZE);
+    bzero(buf, sizeof(char) * BUF_SIZE);
 }
 /****************************************************
  * Description : create socket with AF_INET and TCP
@@ -43,10 +44,13 @@ void Client::init(){
  * Date        : 2019.8.28
  ****************************************************/
 int Client::creat_socket() {
-    if(sockfd = socket(AF_INET,SOCK_STREAM,0) == -1){
+    if((sockfd = socket(AF_INET,SOCK_STREAM, 0)) == -1){
         perror("Failed to create socket.\n");
+
         return 0;
     }
+    auto flags = fcntl(sockfd, F_GETFL, 0);
+    fcntl(sockfd, flags & ~O_NONBLOCK);
     return 1;
 }
 /****************************************************
@@ -83,12 +87,17 @@ int Client::send_msg(const std::string & msg) {
  * Date        : 2019.8.28
  ****************************************************/
 int Client::recv_msg(char * ret) {
-    int status = recv(sockfd, buf, BUF_SIZE, 0);
+    int status = (int)recv(sockfd, buf, BUF_SIZE, 0);
+
     if(status == -1){
         perror("Failed to receive message from server.\n");
+        return -1;
+    } else if (status == 0) {
         return 0;
     }
+
     strcpy(ret, buf);
+
     return 1;
 }
 
