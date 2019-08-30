@@ -13,7 +13,7 @@ private:
     char server_ip[20] = "127.0.0.1";
 //<<<<<<< HEAD
 //=======
-//    const int SERVER_PORT = 8000;
+    const int SERVER_PORT = 8000;
     const int BUFSIZE = 200;
 //>>>>>>> a67024fb63490a18e97fe640b059747fedbfd13a
     int port;
@@ -34,7 +34,7 @@ private:
 
 public:
     static Client * getIns();
-    int initialize_net(int Port,const char *ip);
+    int initialize_net();
     int recv_msg(char * ret);
 
 
