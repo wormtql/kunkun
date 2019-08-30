@@ -1,0 +1,65 @@
+backend:
+
+
+login:
+    recv:
+    {
+        "command": "login",
+        "username": "...",
+        "password": "..."
+    }
+    return:
+    {
+        // 若 debug 为 true，则其他项可以忽略，用于调试，以后所有 return 都带有此项
+        "debug": [true | false]
+
+        "command": "login",
+        "status": [true | false],
+        // 错误信息
+        "msg": "..."
+    }
+
+signup:
+    recv:
+    {
+        "command": "signup",
+        "username": "...",
+        "password": "..."
+    }
+    return:
+    {
+        "command": "signup",
+        "status": [true | false],
+        // 错误信息
+        "msg": "..."
+    }
+
+// 创建群聊
+create_group:
+    recv:
+    {
+        "command": "create_group",
+        // 群聊发起者
+        "who": "[username]",
+        "group_name": "..."
+    }
+    return:
+    {
+        "command": "create_group",
+        "status": [true | false],
+        "msg": "..."
+    }
+
+rename_group:
+    recv:
+    {
+        "command": "rename_group",
+        // 需检测是否为创建者
+        "who": "[username]",
+        "group_name": "..."
+    }
+    return:
+    {
+        "command": "rename_group",
+        "status"
+    }

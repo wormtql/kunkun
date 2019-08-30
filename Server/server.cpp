@@ -34,6 +34,9 @@ vector<int> alive_socket;
 int lock = 0;
 
 
+const char debug_str[100] = "{\"debug\":true}";
+
+
 // user functional thread function
 void * thread_func(void * data) {
     printf("thread_started\n");
@@ -65,6 +68,13 @@ void * thread_func(void * data) {
             } else {
                 // handle msg here
                 printf("recv from socket %d: %s\n", fd, buf);
+
+                int ret = send(fd, debug_str, sizeof(debug_str), 0);
+                if (ret == -1) {
+                    printf("send fail\n");
+                } else {
+                    printf("send complete\n");
+                }
             }
             
             iter++;
@@ -104,6 +114,7 @@ int main(int argc, char * argv[]) {
     printf("start accepting\n");
 
     while (1) {
+        // printf("aaa\n");
         if ((new_socketfd = accept(socketfd, (sockaddr *)&pin_addr, &pin_addr_size)) < 0) {
             printf("accept error\n");
             exit(1);

@@ -10,7 +10,7 @@ class ClientUtils {
 private:
 
 public:
-    static void login(const std::string & username, const std::string & password, SocketCallback callback);
+    static json login_blocked(const std::string & username, const std::string & password);
 };
 
 

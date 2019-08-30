@@ -15,15 +15,23 @@ private:
     static SocketCallback callback;
     static int lock;
 
+    static int stop;
+
+    static GMutex mutex;
+
 //    Thread() = default;
+
+    static void * service_func(void *);
 
 public:
 
     static void init();
 
-    static void * service_func(void *);
+    static void stop_recv();
 
-    static void set_call_back(SocketCallback callback);
+    static void resume_recv();
+
+//    static void set_call_back(SocketCallback callback);
 
     static void kill();
 };
