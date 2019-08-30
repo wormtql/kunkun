@@ -10,14 +10,19 @@ class Client {
 private:
     int sockfd;
 //    char server_ip[100] = { 0 };
-    char sever_ip[20] = "127.0.0.1";
+    char server_ip[20] = "127.0.0.1";
+//<<<<<<< HEAD
+//=======
+    const int SERVER_PORT = 8000;
+    const int BUFSIZE = 200;
+//>>>>>>> a67024fb63490a18e97fe640b059747fedbfd13a
     int port;
     struct sockaddr_in pin;
     char *buf;
 
     Client();
 
-    void init(int port, const char * ip);
+    void init(int port);
     int creat_socket();
     int connect_to_server();
     int send_msg(const std::string &);
@@ -29,7 +34,7 @@ private:
 
 public:
     static Client * getIns();
-    int initialize_net(int Port,const char *ip);
+    int initialize_net();
     int recv_msg(char * ret);
 
 

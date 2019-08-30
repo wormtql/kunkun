@@ -1,4 +1,30 @@
 #user_panel {
     /*min-width: 100px;*/
-    background: black;
+    /*background: black;*/
+}
+
+#user_panel #avatar {
+    margin-top: 64px;
+    margin-bottom: 64px;
+}
+
+#user_panel .user_panel_label {
+    margin-left: 280px;
+    /*margin-bottom: 32px;*/
+}
+
+#user_panel .user_panel_field_box {
+    margin: 8px 0;
+}
+
+#user_panel .user_panel_entry {
+    background: none;
+    border: none;
+    transition: 300ms;
+    margin-left: 30px;
+    margin-right: 280px;
+}
+
+#user_panel .user_panel_entry:focus {
+    background: rgba(0, 0, 0, 0.1);
 }

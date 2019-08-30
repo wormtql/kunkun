@@ -17,13 +17,18 @@
 #include <cctype>
 #include <cstdlib>
 #include <unistd.h>
+#include <pthread.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <fcntl.h>
 
 #include "json.hpp"
+
+
+typedef std::function<void (const std::string &)> SocketCallback;
 
 
 #include "Utils.h"
@@ -34,6 +39,8 @@
 #include "UserPanel.h"
 #include "AddFriendPanel.h"
 #include "MainWindow.h"
+#include "ClientUtils.h"
+#include "Thread.h"
 
 #define BUF_SIZE 256
 #define MSG_SIZE 256

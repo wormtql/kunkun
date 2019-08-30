@@ -12,7 +12,21 @@ private:
     GtkWidget * root_scroll = nullptr;
     GtkWidget * root = nullptr;
 
+    GtkWidget * avatar;
+    GtkWidget * label_user_name;
+
     UserPanel();
+
+    GtkWidget * create_user_name_field();
+    GtkWidget * create_user_sign_field();
+    GtkWidget * create_gender_field();
+
+    static int on_user_name_enter(GtkWidget * widget, gpointer data);
+
+    static int on_sign_enter(GtkWidget * widget, gpointer data);
+
+    static int on_gender_enter(GtkWidget * widget, gpointer data);
+
 
 public:
     static UserPanel * create();

@@ -51,12 +51,13 @@ GtkWidget* MainWindow::create_side_bar() {
 
     // button add friend
     GtkWidget * button_add_friend = gtk_button_new_from_icon_name("go-bottom", GTK_ICON_SIZE_BUTTON);
-    g_signal_connect(button_friend, "clicked", G_CALLBACK(MainWindow::on_button_friend_clicked), this);
-    gtk_widget_set_name(button_friend, "main_window_button_friend");
+    g_signal_connect(button_add_friend, "clicked", G_CALLBACK(MainWindow::on_button_add_friend_clicked), this);
+    gtk_widget_set_name(button_add_friend, "main_window_button_add_friend");
 
 
     gtk_box_pack_start(GTK_BOX(side_bar), button_user, FALSE, FALSE, 0);
     gtk_box_pack_start(GTK_BOX(side_bar), button_friend, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(side_bar), button_add_friend, FALSE, FALSE, 0);
 
     return side_bar;
 }
@@ -125,7 +126,19 @@ void MainWindow::on_button_user_clicked(GtkWidget *widget, gpointer data) {
 }
 
 void MainWindow::on_button_add_friend_clicked(GtkWidget *widget, gpointer data) {
+    auto window = (MainWindow *)data;
 
+    if (window->current_page) {
+        gtk_widget_hide(window->current_page);
+    }
+
+    if (!window->add_friend_panel) {
+        window->add_friend_panel = AddFriendPanel::create();
+        gtk_box_pack_start(GTK_BOX(window->body), window->add_friend_panel->widget(), TRUE, TRUE, 0);
+    }
+
+    window->current_page = window->add_friend_panel->widget();
+    gtk_widget_show_all(window->current_page);
 }
 
 void MainWindow::on_button_console_clicked(GtkWidget *widget, gpointer data) {

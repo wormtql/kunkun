@@ -20,14 +20,12 @@
 #define MYPORT    8000                          //server's listen port
 #define PORT      8081                          //the begin of srever's chat port
 #define BUFSIZE   200
-#define MAX_USER_NUM 10
+#define MAX_USER_NUM 50
 
 using namespace std;
 
-// gint client_sockfd;
-// gint _2_server_sockfd;
 gint userNum;
-//gchar online_user[MAX_USER_NUM][10];
+gchar online_user[MAX_USER_NUM][20];
 gint  ary_sockfd[MAX_USER_NUM];                         //arrar for clients' sockfd
 gint global_current_sockfd;
 
@@ -38,7 +36,13 @@ void int_to_string( int i, char *s ){
 	s[3] = i%10+'0';
 	s[4] = '\0';
 }
-
+/****************************************************
+ * Description : the function of pthread
+ * Prameter    :
+ * Return      : void *
+ * Date        : 2019.8.29
+ * Ps          :
+ ****************************************************/
 void* _pthread_entrance(void* p)
  {
     gchar buf[BUFSIZE];
@@ -65,7 +69,7 @@ void* _pthread_entrance(void* p)
         if(recv_len<=0)
         {
             userNum--;
-            // memset(online_user[current_user_ID],0,10);
+            memset(online_user[current_user_ID],0,sizeof(online_user[0]));
             ary_sockfd[current_user_ID]=0;
             close(current_user_sockfd);
             return NULL;
@@ -73,6 +77,13 @@ void* _pthread_entrance(void* p)
 
     }
 }
+/****************************************************
+ * Description : init server, the main function entry
+ * Prameter    :
+ * Return      :
+ * Date        : 2019.8.29
+ * Ps          :
+ ****************************************************/
 int main(int argc, char* argv[])
 {
 	int i;
@@ -86,7 +97,7 @@ int main(int argc, char* argv[])
 	struct in_addr sin_addr, client_ip;
 
 	pthread_t ptid[MAX_USER_NUM];
-	g_print("\n======================server initialization======================\n");
+	g_print("\n====================== server initialization ======================\n");
 
 	listen_sockfd = socket(AF_INET,SOCK_STREAM,0);//创建套接字
 	if( listen_sockfd == -1){

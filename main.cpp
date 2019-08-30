@@ -7,6 +7,7 @@ static void activate(GtkApplication * app, gpointer data) {
     CssLoader::getIns()->add_css_global("../css/main_window_style.css");
     CssLoader::getIns()->add_css_global("../css/chat_panel_style.css");
     CssLoader::getIns()->add_css_global("../css/user_panel_style.css");
+    CssLoader::getIns()->add_css_global("../css/add_friend_panel_style.css");
 
     LoginWindow * loginWindow = LoginWindow::create();
     MainWindow * mainWindow = nullptr;
@@ -29,6 +30,13 @@ static void activate(GtkApplication * app, gpointer data) {
 }
 
 int main(int argc, char * argv[]) {
+
+    // init client socket
+    Client::getIns()->initialize_net(1234, "127.0.0.1");
+
+    // launch thread for listening message
+    Thread::init();
+
     GtkApplication * app;
     int status;
 
@@ -36,6 +44,10 @@ int main(int argc, char * argv[]) {
     g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
     status = g_application_run(G_APPLICATION(app), argc, argv);
     g_object_unref(app);
+
+
+    // kill thread
+    Thread::kill();
 
     return status;
 }

@@ -7,7 +7,20 @@
 
 
 class AddFriendPanel {
+private:
 
+    GtkWidget * root = nullptr;
+
+    GtkWidget * search_bar = nullptr;
+
+    GtkWidget * search_result = nullptr;
+
+    AddFriendPanel();
+
+public:
+    static AddFriendPanel * create();
+
+    GtkWidget * widget();
 };
 
 

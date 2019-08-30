@@ -1,0 +1,21 @@
+#add_friend_panel {
+    /*background: black;*/
+}
+
+#add_friend_panel #search_bar {
+    border: none;
+    background: rgba(0, 0, 0, 0.05);
+    margin: 16px 100px 0 100px;
+}
+
+#add_friend_panel #add_friend_panel_header {
+    margin-top: 16px;
+    font-size: 2em;
+}
+
+#add_friend_panel #search_result_scroll {
+    min-height: 200px;
+    background: rgba(0, 0, 0, 0.1);
+    margin: 32px 100px 48px 100px;
+    border-radius: 10px;
+}
