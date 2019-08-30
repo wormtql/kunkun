@@ -23,6 +23,10 @@ public:
     static json rename_group_blocked(int group_id, const std::string & new_name, const std::string who);
 
 
+    static json alter_user_info(const std::string & who, const std::string & field, const std::string new_val);
+
+
+
     // todo ...
 };
 

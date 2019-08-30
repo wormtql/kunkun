@@ -81,5 +81,15 @@ send_add_friend_request
         "msg": "..."
     }
 
+alter_user_info
+    recv:
+    {
+        "command": "...",
+        "who": "[username]",
+        "field": "[username | gender | sign ...]",
+        "new_val": "[value]"
+        "status": ...
+        "msg": ...
+    }
 
 ...

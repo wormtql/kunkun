@@ -202,17 +202,25 @@ void LoginWindow::btn_signup_clicked(GtkWidget *widget, gpointer data) {
     std::string password = gtk_entry_get_text(GTK_ENTRY(Utils::find_child(window->widget(), "entry_signup_pw")));
     std::string cfm_password = gtk_entry_get_text(GTK_ENTRY(Utils::find_child(window->widget(), "entry_signup_cfm_pw")));
 
-//    std::cout << username << password << cfm_password << std::endl;
-
     if (password != cfm_password) {
         window->set_error_info("密码与确认密码不一致!");
         return;
     }
 
+    bool succ = false;
     std::string info;
-    //bool ret = Client::signup(username, password, cfm_password, info);
-    bool ret = false;
-    if (ret) {
+
+    json ret = ClientUtils::signup_blocked(username, password);
+
+
+    if (ret["debug"]) {
+        succ = true;
+    } else {
+        succ = ret["status"];
+//        info = ret["msg"];
+    }
+
+    if (succ) {
         printf("signup successful\n");
         window->func();
     } else {
