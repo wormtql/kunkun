@@ -174,24 +174,25 @@ void LoginWindow::btn_login_clicked(GtkWidget *widget, gpointer data) {
     std::string username = gtk_entry_get_text(GTK_ENTRY(Utils::find_child(window->widget(), "entry_login_username")));
     std::string password = gtk_entry_get_text(GTK_ENTRY(Utils::find_child(window->widget(), "entry_login_pw")));
 
-    std::string info;
+    bool succ = false;
 
-    ClientUtils::login(username, password, [] (const std::string & data) {
-        std::cout << "from server: " << data << std::endl;
+    json ret = ClientUtils::login_blocked(username, password);
+
+    if (ret["debug"]) {
+        succ = true;
+    } else {
+        //todo
+        succ = false;
+    }
 
 
-        json j = json::parse(data);
-        std::cout << j["COMMAND"] << std::endl;
-    });
-
-
-//    if (true) {
-//        printf("login successful\n");
-//        window->func();
-//    } else {
-//        window->set_error_info("username or password not correct");
-//        return;
-//    }
+    if (succ) {
+        printf("login successful\n");
+        window->func();
+    } else {
+        window->set_error_info("username or password not correct");
+        return;
+    }
 }
 
 void LoginWindow::btn_signup_clicked(GtkWidget *widget, gpointer data) {

@@ -76,6 +76,7 @@ json init_return_json( json recv_msg )
     return j;
 }
 
+
 void process_msg( json recv_msg, int fd )
 {
     json return_msg = init_return_json( recv_msg );
@@ -112,6 +113,9 @@ void process_msg( json recv_msg, int fd )
     //
 
 }
+
+const char debug_str[100] = "{\"debug\":true}";
+
 // user functional thread function
 void * thread_func(void * data) {
     printf("thread_started\n");
@@ -145,7 +149,14 @@ void * thread_func(void * data) {
                 // handle msg here
                 json j = json::parse(buf);
                 printf("recv from socket %d: %s\n", fd, buf);
-                process_msg( j, fd );
+                //process_msg( j, fd );
+
+                int ret = send(fd, debug_str, sizeof(debug_str), 0);
+                if (ret == -1) {
+                    printf("send fail\n");
+                } else {
+                    printf("send complete\n");
+                }
             }
             
             iter++;
@@ -185,6 +196,7 @@ int main(int argc, char * argv[]) {
     printf("start accepting\n");
 
     while (1) {
+        // printf("aaa\n");
         if ((new_socketfd = accept(socketfd, (sockaddr *)&pin_addr, &pin_addr_size)) < 0) {
             printf("accept error\n");
             exit(1);
