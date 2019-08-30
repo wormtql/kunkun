@@ -162,16 +162,16 @@ int Client::initialize_net() {
         return 0;
     }
 
-    memset(buf,0,sizeof(buf));
-    recv_len = recv(server_sockfd, buf, BUFSIZE, 0);
-    if (recv_len<0){
-        printf("recv error!\n");
-        return 0;
-    }else{
-        buf[recv_len] = '\0';
-        Client::getIns()->port = string_to_int(buf);//port
-        g_print("The server connect port:%d\n",Client::getIns()->port);
-    }
+//    memset(buf,0,sizeof(buf));
+//    recv_len = recv(server_sockfd, buf, BUFSIZE, 0);
+//    if (recv_len<0){
+//        printf("recv error!\n");
+//        return 0;
+//    }else{
+//        buf[recv_len] = '\0';
+//        Client::getIns()->port = string_to_int(buf);//port
+//        g_print("The server connect port:%d\n",Client::getIns()->port);
+//    }
 
     listen_sockfd = socket(AF_INET,SOCK_STREAM, 0);
     listen_sockaddr.sin_family = AF_INET;

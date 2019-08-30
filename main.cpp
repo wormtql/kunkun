@@ -32,10 +32,11 @@ static void activate(GtkApplication * app, gpointer data) {
 int main(int argc, char * argv[]) {
 
     // init client socket
-    Client::getIns()->initialize_net(1234, "127.0.0.1");
+//    Client::getIns()->initialize_net(1234, "127.0.0.1");
+    Client::getIns()->initialize_net();
 
     // launch thread for listening message
-    Thread::init();
+//    Thread::init();
 
     GtkApplication * app;
     int status;
@@ -46,8 +47,9 @@ int main(int argc, char * argv[]) {
     g_object_unref(app);
 
 
+
     // kill thread
-    Thread::kill();
+//    Thread::kill();
 
     return status;
 }
