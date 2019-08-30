@@ -13,17 +13,20 @@
 #include <arpa/inet.h>
 #include <gtk/gtk.h>
 #include <fcntl.h>
+#include <mysql.h>
+#include "json.hpp"
 
 // #include "json.hpp"
 
 #define myport 1234
-
+#define BUFSIZE 20000
+using json = nlohmann::json;
 using std::map;
 using std::string;
 using std::vector;
 
 // recv buffer
-char buf[20000] = { 0 };
+char buf[BUFSIZE] = { 0 };
 
 // socket id to username
 map<int, string> fd_to_username;
@@ -33,7 +36,82 @@ map<string, int> username_to_fd;
 vector<int> alive_socket;
 int lock = 0;
 
+// logout and map_erase
+void check_logout( const int fd ){
+    string username = fd_to_username[fd];
+    username_to_fd.erase( username );
+    fd_to_username.erase( fd );
+}
 
+// check user login
+bool check_login( const json recv_msg )
+{
+    //get username
+    string username = recv_msg["username"];
+    // check login with map
+    if( username_to_fd.find( username ) != username_to_fd.end() )
+    {
+        return 1;
+    }
+    return 0;
+}
+
+bool check_password( const json recv_msg )
+{
+    //get username
+    string username = recv_msg["username"];
+    string user_password = recv_msg["password"];
+
+    //check_password with mysql ... mzh
+
+}
+
+json init_return_json( json recv_msg )
+{
+    json j;
+    j["debug"] = true; // 调试时修改
+    j["command"] = recv_msg["command"];
+    j["status"] = flase;
+    j["msg"] = "";
+    return j;
+}
+
+void process_msg( json recv_msg, int fd )
+{
+    json return_msg = init_return_json( recv_msg );
+    char buf[BUFSIZE] = {0};
+    if( recv_msg["command"] == "login" ) // login
+    { 
+        bool already_login = check_login( recv_msg );
+        if( already_login )
+        {
+            return_msg["msg"] = recv_msg["username"] + " had log in";
+        }
+        else
+        {
+            bool password_match = check_password( recv_msg );
+            if( password_match )
+            {
+                string username = recv_msg["username"];
+                username_to_fd[username] = fd;
+                fd_to_username[fd] = username;
+                return_msg["status"] = true;
+            }
+            else
+            {
+                return_msg["msg"] = "password incorrect";
+            }
+        }
+    }
+    else if( recv_msg["command"] == "signup" )
+    {
+
+    }
+
+    string 
+    //
+
+}
 // user functional thread function
 void * thread_func(void * data) {
     printf("thread_started\n");
@@ -51,7 +129,8 @@ void * thread_func(void * data) {
 
             if (status == 0) {
                 printf("user %d exited\n", fd);
-                
+                // user log out
+                check_logout( fd );
                 iter = alive_socket.erase(iter);
                 continue;
             } else if (status == -1) {
@@ -64,7 +143,9 @@ void * thread_func(void * data) {
                 
             } else {
                 // handle msg here
+                json j = json::parse(buf);
                 printf("recv from socket %d: %s\n", fd, buf);
+                process_msg( j, fd );
             }
             
             iter++;
