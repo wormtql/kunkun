@@ -36,7 +36,7 @@ int main(int argc, char * argv[]) {
     Client::getIns()->initialize_net();
 
     // launch thread for listening message
-//    Thread::init();
+    Thread::init();
 
     GtkApplication * app;
     int status;
@@ -49,7 +49,7 @@ int main(int argc, char * argv[]) {
 
 
     // kill thread
-//    Thread::kill();
+    Thread::kill();
 
     return status;
 }

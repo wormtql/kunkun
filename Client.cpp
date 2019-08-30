@@ -14,73 +14,72 @@ Client::Client(){}
 * Return      : None
 * Date        : 2019.8.28
 ****************************************************/
-int Client::string_to_int(char *s) {
-    int len = strlen(s);
-    int res = 0;
-    for(int i = 0; i < len; i++ ){
-        res = res*10+s[i]-'0';
-    }
-    return res;
-}
+//int Client::string_to_int(char *s) {
+//    int len = strlen(s);
+//    int res = 0;
+//    for(int i = 0; i < len; i++ ){
+//        res = res*10+s[i]-'0';
+//    }
+//    return res;
+//}
 /****************************************************
 * Description : init 'pin' and 'msg' and 'buf' and 'ip' and 'port
 * Prameter    : None
 * Return      : None
 * Date        : 2019.8.28
 ****************************************************/
-void Client::init(int port){
+//void Client::init(){
 //    strcpy(this->server_ip, ip);
-    bzero(&pin,sizeof(pin));    //init 0
-
-    pin.sin_family = AF_INET;
-    pin.sin_addr.s_addr = htonl(INADDR_ANY);
-    pin.sin_port = htons(port);
-    buf = (char*)malloc(sizeof(char) * BUF_SIZE);
-    bzero(buf, sizeof(char) * BUF_SIZE);
-}
+//    bzero(&pin, sizeof(pin));    //init 0
+//    pin.sin_family = AF_INET;
+//    pin.sin_addr.s_addr = htonl(INADDR_ANY);
+//    pin.sin_port = htons(SERVER_PORT);
+//    buf = (char*)malloc(sizeof(char) * BUF_SIZE);
+//    bzero(buf, sizeof(char) * BUF_SIZE);
+//}
 /****************************************************
  * Description : create socket with AF_INET and TCP
  * Prameter    : None
  * Return      : int : 1 success  0 failed
  * Date        : 2019.8.28
  ****************************************************/
-int Client::creat_socket() {
-    if((sockfd = socket(AF_INET,SOCK_STREAM, 0)) == -1){
-        perror("Failed to create socket.\n");
-
-        return 0;
-    }
-    auto flags = fcntl(sockfd, F_GETFL, 0);
-    fcntl(sockfd, flags & ~O_NONBLOCK);
-    return 1;
-}
+//int Client::creat_socket() {
+//    if((sockfd = socket(AF_INET,SOCK_STREAM, 0)) == -1){
+//        perror("Failed to create socket.\n");
+//
+//        return 0;
+//    }
+//    auto flags = fcntl(sockfd, F_GETFL, 0);
+//    fcntl(sockfd, flags & ~O_NONBLOCK);
+//    return 1;
+//}
 /****************************************************
  * Description : connect to server
  * Prameter    : None
  * Return      : int : 1 success  0 failed
  * Date        : 2019.8.28
  ****************************************************/
-int Client::connect_to_server() {
-    if(connect(sockfd,(struct sockaddr *)&pin, sizeof(pin)) == -1){
-        perror("Failed connect to server.\n");
-        return 0;
-    }
-    return 1;
-}
+//int Client::connect_to_server() {
+//    if(connect(sockfd,(struct sockaddr *)&pin, sizeof(pin)) == -1){
+//        perror("Failed connect to server.\n");
+//        return 0;
+//    }
+//    return 1;
+//}
 /****************************************************
  * Description : send message to server
  * Prameter    : None
  * Return      : int : 1 success  0 failed
  * Date        : 2019.8.28
  ****************************************************/
-int Client::send_msg(const std::string & msg) {
-    if(send(sockfd,msg.c_str(),msg.length(),0) == -1){
-        perror("Failed to send message to server.\n");
-        return 0;
-    }
-    printf("Send \" %s \" to server successfully.\n",msg.c_str());
-    return 1;
-}
+//int Client::send_msg(const std::string & msg) {
+//    if(send(sockfd,msg.c_str(),msg.length(),0) == -1){
+//        perror("Failed to send message to server.\n");
+//        return 0;
+//    }
+//    printf("Send \" %s \" to server successfully.\n",msg.c_str());
+//    return 1;
+//}
 /****************************************************
  * Description : receive message from server
  * Prameter    : None
@@ -91,10 +90,19 @@ int Client::recv_msg(char * ret) {
     int status = (int)recv(sockfd, buf, BUF_SIZE, 0);
 
     if(status == -1){
-        perror("Failed to receive message from server.\n");
-        return -1;
+        if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR) {
+            // return nothing;
+            return 0;
+        } else {
+            // return error
+            return -1;
+        }
     } else if (status == 0) {
-        return 0;
+        // connection break
+
+        close(this->sockfd);
+
+        return -2;
     }
 
     strcpy(ret, buf);
@@ -102,17 +110,17 @@ int Client::recv_msg(char * ret) {
     return 1;
 }
 
-void Client::set_port(int Port) {
-    port = Port;
-}
+//void Client::set_port(int Port) {
+//    port = Port;
+//}
 
-const char* Client::get_buf() {
-    return (const char*)buf;
-}
+//const char* Client::get_buf() {
+//    return (const char*)buf;
+//}
 
-int Client::get_sockfd() {
-    return sockfd;
-}
+//int Client::get_sockfd() {
+//    return sockfd;
+//}
 
 /****************************************************
  * Description : singleton Instance mode
@@ -122,7 +130,6 @@ int Client::get_sockfd() {
  ****************************************************/
 Client* Client::getIns() {
     static Client ins;
-
     return &ins;
 }
 /****************************************************
@@ -132,10 +139,10 @@ Client* Client::getIns() {
  * Date        : 2019.8.29
  ****************************************************/
 int Client::send_string(const std::string &message) {
-    if(Client::getIns()->send_msg(message) == 0){
-        return 0;
-    }
-    return 1;
+//    if(Client::getIns()->send_msg(message) == 0){
+//        return 0;
+//    }
+    return (int)send(sockfd, message.c_str(), sizeof(char) * message.size(), 0);
 }
 /****************************************************
  * Description : initialize the net(include creat socket,connect to server and init member in class
@@ -144,69 +151,49 @@ int Client::send_string(const std::string &message) {
  * Date        : 2019.8.29
  ****************************************************/
 int Client::initialize_net() {
-    gint server_sockfd, listen_sockfd;
-    socklen_t server_len, listen_len, client_len;
-    struct sockaddr_in server_sockaddr, listen_sockaddr, client_sockaddr;
-    char buf[BUFSIZE];
-    int recv_len;
+//<<<<<<< HEAD
+//    gint server_sockfd, listen_sockfd;
+//    socklen_t server_len, listen_len, client_len;
+//    sockaddr_in server_sockaddr, listen_sockaddr, client_sockaddr;
+    sockaddr_in pin_addr = { 0 };
+//    char buf[BUFSIZE];
+//    int recv_len;
 
-    server_sockfd = socket(AF_INET,SOCK_STREAM, 0);
-    server_sockaddr.sin_family = AF_INET;
-    server_sockaddr.sin_port = htons(SERVER_PORT);
-    server_sockaddr.sin_addr.s_addr = inet_addr(server_ip);
-    memset(&(server_sockaddr.sin_zero),0,sizeof(server_sockaddr.sin_zero));
-    server_len = sizeof(struct sockaddr_in);
+    memset(&pin_addr, 0, sizeof(pin_addr));
 
-    if (connect(server_sockfd,(struct sockaddr *)&server_sockaddr,server_len)<0) {
+//    server_sockfd = socket(AF_INET,SOCK_STREAM, 0);
+    pin_addr.sin_family = AF_INET;
+    pin_addr.sin_port = htons(SERVER_PORT);
+    pin_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+//    memset(&(server_sockaddr.sin_zero),0,sizeof(server_sockaddr.sin_zero));
+//    server_len = sizeof(struct sockaddr_in);
+
+    this->sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (this->sockfd == -1) {
+        printf("error creating socket\n");
+        return -1;
+    }
+
+    if (connect(sockfd, (sockaddr *)&pin_addr, sizeof(pin_addr)) == -1) {
         printf("connect error!\n");
-        return 0;
+        return -1;
     }
 
-//    memset(buf,0,sizeof(buf));
-//    recv_len = recv(server_sockfd, buf, BUFSIZE, 0);
-//    if (recv_len<0){
-//        printf("recv error!\n");
-//        return 0;
-//    }else{
-//        buf[recv_len] = '\0';
-//        Client::getIns()->port = string_to_int(buf);//port
-//        g_print("The server connect port:%d\n",Client::getIns()->port);
-//    }
+    int flags = fcntl(sockfd, F_GETFL, 0);
+    fcntl(sockfd, F_SETFL, flags | O_NONBLOCK);
 
-    listen_sockfd = socket(AF_INET,SOCK_STREAM, 0);
-    listen_sockaddr.sin_family = AF_INET;
-    listen_sockaddr.sin_port = htons(Client::getIns()->port);//change to port recieved
-    listen_sockaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    listen_len = sizeof(struct sockaddr_in);
+//    listen_sockfd = socket(AF_INET,SOCK_STREAM, 0);
+//    listen_sockaddr.sin_family = AF_INET;
+//    listen_sockaddr.sin_port = htons(Client::getIns()->port);//change to port recieved
+//    listen_sockaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+//    listen_len = sizeof(struct sockaddr_in);
 
-    int on = 1;
-    setsockopt(listen_sockfd,SOL_SOCKET,SO_REUSEADDR,&on,sizeof(on));
+//    int on = 1;
+//    setsockopt(Client::getIns()->sockfd,SOL_SOCKET,SO_REUSEADDR,&on,sizeof(on));
 
-    if(bind(listen_sockfd,(struct sockaddr *)&listen_sockaddr,listen_len)<0){
-        printf("bind error!\n");
-        return 0;
-    }else{
-    	printf("bind success!\n");
-    }
+    printf("init socket successful\n");
 
-    if(listen(listen_sockfd,8)<0){
-        printf("listen error!\n");
-        return 0;
-    }
-
-    client_len = sizeof(struct sockaddr_in);
-    Client::getIns()->sockfd = accept( listen_sockfd,(struct sockaddr *)&client_sockaddr,&client_len);
-    if( Client::getIns()->sockfd<0){
-        printf("accept error!\n");
-        return 0;
-    }
-    close(server_sockfd);
-    close(listen_sockfd);
     return 1;
-//    Client::getIns()->init(Port,ip);
-//    if(Client::getIns()->creat_socket() == 0)return 0;
-//    if(Client::getIns()->connect_to_server() == 0)return 0;
-//    return 1;
 }
 /****************************************************
  * Description : send file to server
@@ -215,23 +202,23 @@ int Client::initialize_net() {
  * Date        : 2019.8.29
  * Ps          : without test!!!!
  ****************************************************/
-int Client::send_file_from_file(const std::string &filename) {
-    FILE *fp = fopen(filename.c_str(),"r");
-    if(fp == NULL){
-        perror("Failed to open file.");
-        return 0;
-    }
-    int block_length;
-    char file_buf[FILE_BLOCK_SIZE];
-    bzero(file_buf,sizeof(file_buf));
-    while((block_length = fread(file_buf, sizeof(char),BUF_SIZE,fp)) > 0){
-        if(Client::getIns()->send_msg(file_buf) == 0){
-            perror("Failed to send file block.");
-            return 0;
-        }
-        printf("Successfully send %dByte to server.  --File : %s-- ",block_length,filename.c_str());
-        bzero(file_buf,sizeof(file_buf));
-    }
-    printf("Finished transfer File : %s.",filename.c_str());
-    return 1;
-}
+//int Client::send_file_from_file(const std::string &filename) {
+//    FILE *fp = fopen(filename.c_str(),"r");
+//    if(fp == NULL){
+//        perror("Failed to open file.");
+//        return 0;
+//    }
+//    int block_length;
+//    char file_buf[FILE_BLOCK_SIZE];
+//    bzero(file_buf,sizeof(file_buf));
+//    while((block_length = fread(file_buf, sizeof(char),BUF_SIZE,fp)) > 0){
+//        if(Client::getIns()->send_msg(file_buf) == 0){
+//            perror("Failed to send file block.");
+//            return 0;
+//        }
+//        printf("Successfully send %dByte to server.  --File : %s-- ",block_length,filename.c_str());
+//        bzero(file_buf,sizeof(file_buf));
+//    }
+//    printf("Finished transfer File : %s.",filename.c_str());
+//    return 1;
+//}
