@@ -38,6 +38,7 @@ typedef std::function<void (const std::string &)> SocketCallback;
 #include "ChatPanel.h"
 #include "UserPanel.h"
 #include "AddFriendPanel.h"
+#include "ConsolePanel.h"
 #include "MainWindow.h"
 #include "ClientUtils.h"
 #include "Thread.h"
