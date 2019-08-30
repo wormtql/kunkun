@@ -10,13 +10,13 @@ class Client {
 private:
     int sockfd;
 
-    const char server_ip[20] = "127.0.0.1";
-    const int SERVER_PORT = 1234;
-    const int BUFSIZE = 200;
+    static const char server_ip[20];
+    static const int SERVER_PORT;
+    static const int BUFSIZE;
 
 //    int port;
     struct sockaddr_in pin;
-    char *buf;
+    char * buf;
 
     Client();
 
@@ -38,6 +38,9 @@ public:
 
 
     int recv_msg(char * ret);
+
+
+    int recv_blocked(char * ret);
 
 
     int send_string(const std::string & message);

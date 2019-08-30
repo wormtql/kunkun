@@ -6,6 +6,12 @@
 
 #include "Client.h"
 
+
+const char Client::server_ip[20] = "127.0.0.1";
+const int Client::SERVER_PORT = 1234;
+const int Client::BUFSIZE = 200;
+
+
 Client::Client(){}
 
 /****************************************************
@@ -87,7 +93,7 @@ Client::Client(){}
  * Date        : 2019.8.28
  ****************************************************/
 int Client::recv_msg(char * ret) {
-    int status = (int)recv(sockfd, buf, BUF_SIZE, 0);
+    int status = (int)recv(sockfd, buf, BUFSIZE, 0);
 
     if(status == -1){
         if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR) {
@@ -108,6 +114,32 @@ int Client::recv_msg(char * ret) {
     strcpy(ret, buf);
 
     return 1;
+}
+
+
+int Client::recv_blocked(char *ret) {
+    while (true) {
+        memset(buf, 0, sizeof(char) * BUFSIZE);
+        int status = (int)recv(sockfd, buf, BUFSIZE, 0);
+
+        if (status == -1) {
+            if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR) {
+                continue;
+            } else {
+                // return error
+                return -1;
+            }
+        } else if (status == 0) {
+            close(this->sockfd);
+
+            return -2;
+        } else {
+
+            strcpy(ret, buf);
+
+            return 1;
+        }
+    }
 }
 
 //void Client::set_port(int Port) {
@@ -151,22 +183,16 @@ int Client::send_string(const std::string &message) {
  * Date        : 2019.8.29
  ****************************************************/
 int Client::initialize_net() {
-//<<<<<<< HEAD
-//    gint server_sockfd, listen_sockfd;
-//    socklen_t server_len, listen_len, client_len;
-//    sockaddr_in server_sockaddr, listen_sockaddr, client_sockaddr;
+    buf = new char[BUFSIZE];
+    memset(buf, 0, sizeof(char) * BUFSIZE);
+
     sockaddr_in pin_addr = { 0 };
-//    char buf[BUFSIZE];
-//    int recv_len;
 
     memset(&pin_addr, 0, sizeof(pin_addr));
 
-//    server_sockfd = socket(AF_INET,SOCK_STREAM, 0);
     pin_addr.sin_family = AF_INET;
     pin_addr.sin_port = htons(SERVER_PORT);
     pin_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-//    memset(&(server_sockaddr.sin_zero),0,sizeof(server_sockaddr.sin_zero));
-//    server_len = sizeof(struct sockaddr_in);
 
     this->sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (this->sockfd == -1) {
@@ -175,21 +201,12 @@ int Client::initialize_net() {
     }
 
     if (connect(sockfd, (sockaddr *)&pin_addr, sizeof(pin_addr)) == -1) {
-        printf("connect error!\n");
+        printf("connect error! consider start a backend program\n");
         return -1;
     }
 
     int flags = fcntl(sockfd, F_GETFL, 0);
     fcntl(sockfd, F_SETFL, flags | O_NONBLOCK);
-
-//    listen_sockfd = socket(AF_INET,SOCK_STREAM, 0);
-//    listen_sockaddr.sin_family = AF_INET;
-//    listen_sockaddr.sin_port = htons(Client::getIns()->port);//change to port recieved
-//    listen_sockaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-//    listen_len = sizeof(struct sockaddr_in);
-
-//    int on = 1;
-//    setsockopt(Client::getIns()->sockfd,SOL_SOCKET,SO_REUSEADDR,&on,sizeof(on));
 
     printf("init socket successful\n");
 
