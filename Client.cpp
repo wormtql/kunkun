@@ -11,6 +11,9 @@ const char Client::server_ip[20] = "127.0.0.1";
 const int Client::SERVER_PORT = 1234;
 const int Client::BUFSIZE = 200;
 
+GMutex Client::ins_mutex;
+Client * Client::ins = nullptr;
+
 
 Client::Client(){}
 
@@ -161,8 +164,21 @@ int Client::recv_blocked(char *ret) {
  * Date        : 2019.8.29
  ****************************************************/
 Client* Client::getIns() {
-    static Client ins;
-    return &ins;
+//    static Client ins;
+//    return &ins;
+
+    if (ins == nullptr)
+    {
+        g_mutex_lock(&ins_mutex);
+        if (ins == nullptr)
+        {
+            ins = new Client();
+        }
+        g_mutex_unlock(&ins_mutex);
+    }
+
+    return ins;
+
 }
 /****************************************************
  * Description : send message to server
@@ -171,10 +187,16 @@ Client* Client::getIns() {
  * Date        : 2019.8.29
  ****************************************************/
 int Client::send_string(const std::string &message) {
-//    if(Client::getIns()->send_msg(message) == 0){
-//        return 0;
-//    }
-    return (int)send(sockfd, message.c_str(), sizeof(char) * message.size(), 0);
+
+    // only one thread can send
+
+    g_mutex_lock(&send_mutex);
+
+    int status = (int)send(sockfd, message.c_str(), sizeof(char) * message.size(), 0);
+
+    g_mutex_unlock(&send_mutex);
+
+    return status;
 }
 /****************************************************
  * Description : initialize the net(include creat socket,connect to server and init member in class

@@ -81,6 +81,18 @@ send_add_friend_request
         "msg": "..."
     }
 
+send_join_group_request
+    recv:
+    {
+        "command": "...",
+        "from": "...",
+        "group_id": "..."
+    }
+    return:
+    {
+        ...
+    }
+
 alter_user_info
     recv:
     {
@@ -88,8 +100,24 @@ alter_user_info
         "who": "[username]",
         "field": "[username | gender | sign ...]",
         "new_val": "[value]"
-        "status": ...
+    }
+    return
+    {
+        "status": ...,
         "msg": ...
+    }
+
+get_user_info
+    recv
+    {
+        "command": ...,
+        "who": ...,
+        "field": ...,
+    }
+    return
+    {
+        "command": ...,
+        "val": ...
     }
 
 list_user_like
@@ -127,6 +155,7 @@ list_group_like
             ...
         ]
     }
+
 
 
 ...

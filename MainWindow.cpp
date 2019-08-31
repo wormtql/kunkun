@@ -25,6 +25,8 @@ MainWindow::MainWindow() {
     this->body = create_body();
     gtk_box_pack_start(GTK_BOX(root), body, TRUE, TRUE, 0);
 
+    MainWindow::on_button_user_clicked(nullptr, this);
+
 }
 
 
@@ -115,6 +117,11 @@ void MainWindow::on_button_friend_clicked(GtkWidget *widget, gpointer data) {
         gtk_box_pack_start(GTK_BOX(window->body), window->chat_panel->widget(), TRUE, TRUE, 0);
     }
 
+    json friends = ClientUtils::get_friends(DataHub::getIns()->username);
+    json groups = ClientUtils::get_groups(DataHub::getIns()->username);
+
+    window->chat_panel->refresh_friends_list(friends, groups);
+
     window->current_page = window->chat_panel->widget();
     gtk_widget_show_all(window->current_page);
 }
@@ -133,6 +140,8 @@ void MainWindow::on_button_user_clicked(GtkWidget *widget, gpointer data) {
         window->user_panel = UserPanel::create();
         gtk_box_pack_start(GTK_BOX(window->body), window->user_panel->widget(), TRUE, TRUE, 0);
     }
+
+    window->user_panel->refresh_user_info();
 
     window->current_page = window->user_panel->widget();
     gtk_widget_show_all(window->current_page);

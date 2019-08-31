@@ -32,6 +32,7 @@
 typedef std::function<void (const std::string &)> SocketCallback;
 
 
+#include "DataHub.h"
 #include "Utils.h"
 #include "CssLoader.h"
 #include "LoginWindow.h"

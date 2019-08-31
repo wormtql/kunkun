@@ -49,6 +49,7 @@ void * thread_func(void * data) {
         while (iter != alive_socket.end()) {
             int fd = *iter;
 
+            memset(buf, 0, sizeof(buf));
             int status = recv(fd, buf, 20000, 0);
 
             if (status == 0) {
