@@ -94,9 +94,14 @@ bool send_add_friend_request( const json recv_msg )
 {
     string to_name = recv_msg["to_name"];
     int to_fd;
+    json to_msg;
+    to_msg["debug"] = true;
+    to_msg["command"] = "recv_add_friend_request";
+    to_msg["from"] = recv_msg["from"];
+    to_msg["to"] = recv_msg["to"];
     if( to_fd = username_to_fd["to_name"] )
     { // onlion operation
-        string s = recv_msg.dump();
+        string s = to_msg.dump();
         char *c = s.data();
         int ret = send(fd, c, sizeof(c), 0);
         if( !ret ){
@@ -246,6 +251,18 @@ void process_msg( const json recv_msg, const int fd )
                 return_msg["msg"] = "send request failed";
             }
             
+        }
+    }
+    else if( recv_msg["command"] == "send_add_friend_result" )
+    {
+        bool send_add_friend_result_res = send_add_friend_result( recv_msg );
+        if( send_add_friend_result_res )
+        {
+            return_msg["status"] = true;
+        }
+        else
+        {
+            return_msg["msg"] = "send result failed";
         }
     }
     else if( recv_msg["command"] == "chat_send_file_begin" )
