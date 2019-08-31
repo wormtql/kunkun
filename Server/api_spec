@@ -81,64 +81,39 @@ send_add_friend_request
         "msg": "..."
     }
 
+// 聊天发送文件申请
+chat_send_file_begin
+    recv:
+    {
+        "command": "chat_send_file_begin",
+        "filename": "[filename]",
+        "from": "[username]",
+        "to": "[username]",
+    }
+    return:
+    {
+        "command": "chat_send_file_begin",
+        "status": [true | false],
+        "fileid": [fileid], // 服务器给文件分配id
+        "msg": "..."
+    }
+
+// 聊天发送文件
 chat_send_file
     recv:
     {
         "command": "chat_send_file",
-        "filename": "[filename]",
-        "from": "[username]",
-        "to": "[username]",
+        "fileid": [fileid], // 申请时服务器返回的文件id
+        "eof": [true,false], // 文件是否读入完成
+        "content": "[filecontent]", // 文件内容
     }
     return:
     {
-        "command": "chat_send_file",
+        "command": "chat_send_file", 
         "status": [true | false],
         "msg": "..."
     }
+    
 
-chat_recv_file
-    recv:
-    {
-        "command": "chat_recv_file",
-        "filename": "[filename]",
-        "from": "[username]",
-        "to": "[username]",
-    }
-    return:
-    {
-        "command": "chat_recv_file",
-        "status": [true | false],
-        "msg": "..."
-    }
-
-group_send_file
-    recv:
-    {
-        "command": "group_send_file",
-        "filename": "[filename]",
-        "from": "[username]",
-        "group": "[groupid]",
-    }
-    return:
-    {
-        "command": "group_send_file",
-        "status": [true | false],
-        "msg": "..."
-    }
-
-group_recv_file
-    recv:
-    {
-        "command": "group_recv_file",
-        "filename": "[filename]",
-        "from": "[username]",
-        "group": "[groupid]",
-    }
-    return:
-    {
-        "command": "group_recv_file",
-        "status": [true | false],
-        "msg": "..."
-    }
 
 ...
