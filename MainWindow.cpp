@@ -25,6 +25,8 @@ MainWindow::MainWindow() {
     this->body = create_body();
     gtk_box_pack_start(GTK_BOX(root), body, TRUE, TRUE, 0);
 
+    MainWindow::on_button_user_clicked(nullptr, this);
+
 }
 
 
@@ -55,9 +57,16 @@ GtkWidget* MainWindow::create_side_bar() {
     gtk_widget_set_name(button_add_friend, "main_window_button_add_friend");
 
 
+    // button console
+    GtkWidget * button_console = gtk_button_new_from_icon_name("go-bottom", GTK_ICON_SIZE_BUTTON);
+    g_signal_connect(button_console, "clicked", G_CALLBACK(MainWindow::on_button_console_clicked), this);
+    gtk_widget_set_name(button_console, "main_window_button_console");
+
+
     gtk_box_pack_start(GTK_BOX(side_bar), button_user, FALSE, FALSE, 0);
     gtk_box_pack_start(GTK_BOX(side_bar), button_friend, FALSE, FALSE, 0);
     gtk_box_pack_start(GTK_BOX(side_bar), button_add_friend, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(side_bar), button_console, FALSE, FALSE, 0);
 
     return side_bar;
 }
@@ -97,6 +106,9 @@ void MainWindow::on_button_friend_clicked(GtkWidget *widget, gpointer data) {
     auto window = (MainWindow *)data;
 
     if (window->current_page) {
+        if (window->chat_panel != nullptr && window->current_page == window->chat_panel->widget()) {
+            return;
+        }
         gtk_widget_hide(window->current_page);
     }
 
@@ -104,6 +116,11 @@ void MainWindow::on_button_friend_clicked(GtkWidget *widget, gpointer data) {
         window->chat_panel = ChatPanel::create();
         gtk_box_pack_start(GTK_BOX(window->body), window->chat_panel->widget(), TRUE, TRUE, 0);
     }
+
+    json friends = ClientUtils::get_friends(DataHub::getIns()->username);
+    json groups = ClientUtils::get_groups(DataHub::getIns()->username);
+
+    window->chat_panel->refresh_friends_list(friends, groups);
 
     window->current_page = window->chat_panel->widget();
     gtk_widget_show_all(window->current_page);
@@ -113,6 +130,9 @@ void MainWindow::on_button_user_clicked(GtkWidget *widget, gpointer data) {
     auto window = (MainWindow *)data;
 
     if (window->current_page) {
+        if (window->user_panel != nullptr && window->current_page == window->user_panel->widget()) {
+            return;
+        }
         gtk_widget_hide(window->current_page);
     }
 
@@ -120,6 +140,8 @@ void MainWindow::on_button_user_clicked(GtkWidget *widget, gpointer data) {
         window->user_panel = UserPanel::create();
         gtk_box_pack_start(GTK_BOX(window->body), window->user_panel->widget(), TRUE, TRUE, 0);
     }
+
+    window->user_panel->refresh_user_info();
 
     window->current_page = window->user_panel->widget();
     gtk_widget_show_all(window->current_page);
@@ -129,6 +151,9 @@ void MainWindow::on_button_add_friend_clicked(GtkWidget *widget, gpointer data) 
     auto window = (MainWindow *)data;
 
     if (window->current_page) {
+        if (window->add_friend_panel != nullptr && window->current_page == window->add_friend_panel->widget()) {
+            return;
+        }
         gtk_widget_hide(window->current_page);
     }
 
@@ -142,5 +167,20 @@ void MainWindow::on_button_add_friend_clicked(GtkWidget *widget, gpointer data) 
 }
 
 void MainWindow::on_button_console_clicked(GtkWidget *widget, gpointer data) {
+    auto window = (MainWindow *)data;
 
+    if (window->current_page) {
+        if (window->console_panel != nullptr && window->current_page == window->console_panel->widget()) {
+            return;
+        }
+        gtk_widget_hide(window->current_page);
+    }
+
+    if (!window->console_panel) {
+        window->console_panel = ConsolePanel::create();
+        gtk_box_pack_start(GTK_BOX(window->body), window->console_panel->widget(), TRUE, TRUE, 0);
+    }
+
+    window->current_page = window->console_panel->widget();
+    gtk_widget_show_all(window->current_page);
 }

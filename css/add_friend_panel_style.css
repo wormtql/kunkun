@@ -14,8 +14,51 @@
 }
 
 #add_friend_panel #search_result_scroll {
-    min-height: 200px;
-    background: rgba(0, 0, 0, 0.1);
-    margin: 32px 100px 48px 100px;
+    min-height: 330px;
+    /*background: rgba(0, 0, 0, 0.1);*/
+    margin: 32px 100px 0 100px;
     border-radius: 10px;
+}
+
+#add_friend_panel #status_bar {
+    background: linear-gradient(45deg, crimson, #7ee0ff);
+    min-height: 32px;
+    color: white;
+}
+
+#add_friend_panel #search_result {
+    padding: 0 16px;
+}
+
+#add_friend_panel .search_result_image {
+    /*margin: 16px;*/
+}
+
+#add_friend_panel .search_result_label {
+    margin-left: 16px;
+}
+
+#add_friend_panel .search_result_button {
+    background: none;
+    border: none;
+    margin: 16px 0;
+    transition: 300ms;
+}
+
+#add_friend_panel .search_result_button:hover {
+    background: linear-gradient(45deg, crimson, #ff7640);
+    color: white;
+}
+
+#add_friend_panel .search_result_item_friend {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    /*margin: 0 16px;*/
+    /*padding: 0 16px;*/
+
+    /*background: linear-gradient(45deg, crimson, white);*/
+}
+
+#add_friend_panel .search_result_item_group {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    /*margin: 0 16px;*/
 }

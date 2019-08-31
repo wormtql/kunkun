@@ -12,6 +12,7 @@
 #include <cstring>
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 #include <vector>
 #include <functional>
 #include <cctype>
@@ -31,6 +32,7 @@
 typedef std::function<void (const std::string &)> SocketCallback;
 
 
+#include "DataHub.h"
 #include "Utils.h"
 #include "CssLoader.h"
 #include "LoginWindow.h"
@@ -38,6 +40,7 @@ typedef std::function<void (const std::string &)> SocketCallback;
 #include "ChatPanel.h"
 #include "UserPanel.h"
 #include "AddFriendPanel.h"
+#include "ConsolePanel.h"
 #include "MainWindow.h"
 #include "ClientUtils.h"
 #include "Thread.h"

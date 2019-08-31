@@ -17,6 +17,8 @@ public:
     static void remove_css_class(GtkWidget * widget, const char * name);
 
     static GdkPixbuf * get_clipped_image(GdkPixbuf * image, int radius);
+
+    static GdkPixbuf * load_from_file(const std::string & file, int size);
 };
 
 

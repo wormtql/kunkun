@@ -20,6 +20,7 @@ private:
     ChatPanel * chat_panel = nullptr;
     UserPanel * user_panel = nullptr;
     AddFriendPanel * add_friend_panel = nullptr;
+    ConsolePanel * console_panel = nullptr;
 
 
     MainWindow();

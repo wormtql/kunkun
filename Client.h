@@ -18,6 +18,14 @@ private:
     struct sockaddr_in pin;
     char * buf;
 
+
+    static Client * ins;
+
+    // for get ins
+    static GMutex ins_mutex;
+    // for send
+    GMutex send_mutex;
+
     Client();
 
 //    void init();

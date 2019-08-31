@@ -12,11 +12,26 @@ using json = nlohmann::json;
 
 class ChatPanel {
 private:
+    // side item data
+    struct Data
+    {
+        ChatPanel * chat_panel;
+        std::string type;
+        std::string name;
+        std::string id;
+    };
+    // chat item data
+    struct ChatData {
+        ChatPanel * chat_panel;
+        std::string file_name;
+        std::string file_id;
+    };
+private:
 
     // box
     GtkWidget * root = nullptr;
 
-    // scrolled window
+    // box, friends list
     GtkWidget * side_bar = nullptr;
 
     // box
@@ -24,6 +39,7 @@ private:
 
     // 消息框
     GtkWidget * chat_body = nullptr;
+    GtkWidget * chat_body_box = nullptr;
 
     // input box
     GtkWidget * input_box = nullptr;
@@ -31,6 +47,9 @@ private:
 
 
     GtkWidget * current_friend = nullptr;
+
+    std::string current_type = "";
+    std::string current_name = "";
 
 
     ChatPanel();
@@ -45,7 +64,8 @@ private:
 
     GtkWidget * create_button_set_2();
 
-    void create_all_side_items();
+
+    GtkWidget * create_chat_item(GdkPixbuf * pix, const json & item, bool self);
 
     static void on_button_file_clicked(GtkWidget * widget, gpointer data);
 
@@ -55,10 +75,23 @@ private:
 
     static void on_button_side_item_clicked(GtkWidget * widget, gpointer data);
 
+
+    static void on_button_recv_file_clicked(GtkWidget * widget, gpointer data);
+
 public:
     static ChatPanel * create();
 
     GtkWidget * widget();
+
+
+    void append_chat_item(GdkPixbuf * pix, const json & item, bool self);
+    void clear_chat_item();
+
+
+    void refresh_friends_list(json friends, json groups);
+
+
+    void refresh_chat_body();
 };
 
 
