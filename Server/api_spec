@@ -48,6 +48,7 @@ create_group:
     {
         "command": "create_group",
         "status": [true | false],
+        "group_id": [group_id], // 服务器分配群聊ID
         "msg": "..."
     }
 
