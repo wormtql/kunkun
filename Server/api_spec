@@ -2,13 +2,13 @@ backend:
 
 
 login:
-    recv:
+    client:
     {
         "command": "login",
         "username": "...",
         "password": "..."
     }
-    return:
+    server:
     {
         // 若 debug 为 true，则其他项可以忽略，用于调试，以后所有 return 都带有此项
         "debug": [true | false]
@@ -20,13 +20,13 @@ login:
     }
 
 signup:
-    recv:
+    client:
     {
         "command": "signup",
         "username": "...",
         "password": "..."
     }
-    return:
+    server:
     {
         "command": "signup",
         "status": [true | false],
@@ -37,14 +37,14 @@ signup:
 
 // 创建群聊
 create_group:
-    recv:
+    client:
     {
         "command": "create_group",
         // 群聊发起者
         "who": "[username]",
         "group_name": "..."
     }
-    return:
+    server:
     {
         "command": "create_group",
         "status": [true | false],
@@ -53,7 +53,7 @@ create_group:
     }
 
 rename_group:
-    recv:
+    client:
     {
         "command": "rename_group",
         // 需检测是否为创建者
@@ -61,27 +61,54 @@ rename_group:
         "group_id": "...",
         "new_name": "..."
     }
-    return:
+    server:
     {
         "command": "rename_group",
         "status": [true | false],
         "msg": "..."
     }
 
+// 发送好友请求
 send_add_friend_request
-    recv:
+    client:
     {
         "command": "send_add_friend_request",
         "from": "[username]",
         "to": "[username]",
     }
-    return:
+    server:
     {
         "command": "send_add_friend_request",
         "status": [true | false],
         "msg": "..."
     }
 
+// 接收好友请求
+recv_add_friend_request
+    server:
+    {
+        "command": "recv_add_friend_request",
+        "from": "[username]",
+        "to": "[username]",
+        "accept": [true | false],
+    }
+    client:
+    {
+        "command": "recv_add_friend_request",
+        "accept": [true | false],
+        "status": [true | false],
+        "msg": "..."
+    }
+    
+// 好友请求结果 // 拒绝-单方向发送 & 接受-双方向发送
+add_friend_result
+    server:
+    {
+        "command": "add_friend_result",
+        "from": "[username]",
+        "to": "[username]",
+    }
+    
 // 聊天发送文件申请
 chat_send_file_begin
     recv:
@@ -105,7 +132,7 @@ chat_send_file
     {
         "command": "chat_send_file",
         "fileid": [fileid], // 申请时服务器返回的文件id
-        "eof": [true,false], // 文件是否读入完成
+        "eof": [true | false], // 文件是否读入完成
         "content": "[filecontent]", // 文件内容
     }
     return:
