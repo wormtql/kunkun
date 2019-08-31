@@ -1,6 +1,6 @@
 backend:
 
-
+// 登录
 login:
     client:
     {
@@ -19,6 +19,7 @@ login:
         "msg": "..."
     }
 
+// 注册
 signup:
     client:
     {
@@ -52,6 +53,7 @@ create_group:
         "msg": "..."
     }
 
+// 重命名群聊
 rename_group:
     client:
     {
@@ -96,9 +98,9 @@ recv_add_friend_request
 send_add_friend_result
     client:
     {
-        "command": "add_friend_result",
-        "from": "[username]",
-        "to": "[username]",
+        "command": "send_add_friend_result",
+        "from": "[username]", // 申请好友方
+        "to": "[username]", // 当前客户端，接受好友申请方
         "accept": [true | false],
     }
     server:
