@@ -1,14 +1,14 @@
 backend:
 
-
+// 登录
 login:
-    recv:
+    client:
     {
         "command": "login",
         "username": "...",
         "password": "..."
     }
-    return:
+    server:
     {
         // 若 debug 为 true，则其他项可以忽略，用于调试，以后所有 return 都带有此项
         "debug": [true | false]
@@ -19,14 +19,15 @@ login:
         "msg": "..."
     }
 
+// 注册
 signup:
-    recv:
+    client:
     {
         "command": "signup",
         "username": "...",
         "password": "..."
     }
-    return:
+    server:
     {
         "command": "signup",
         "status": [true | false],
@@ -37,22 +38,24 @@ signup:
 
 // 创建群聊
 create_group:
-    recv:
+    client:
     {
         "command": "create_group",
         // 群聊发起者
         "who": "[username]",
         "group_name": "..."
     }
-    return:
+    server:
     {
         "command": "create_group",
         "status": [true | false],
+        "group_id": [group_id], // 服务器分配群聊ID
         "msg": "..."
     }
 
+// 重命名群聊
 rename_group:
-    recv:
+    client:
     {
         "command": "rename_group",
         // 需检测是否为创建者
@@ -60,21 +63,22 @@ rename_group:
         "group_id": "...",
         "new_name": "..."
     }
-    return:
+    server:
     {
         "command": "rename_group",
         "status": [true | false],
         "msg": "..."
     }
 
+// 发送好友请求
 send_add_friend_request
-    recv:
+    client:
     {
         "command": "send_add_friend_request",
         "from": "[username]",
         "to": "[username]",
     }
-    return:
+    server:
     {
         "command": "send_add_friend_request",
         "status": [true | false],
@@ -156,6 +160,124 @@ list_group_like
         ]
     }
 
+// 接收好友请求
+recv_add_friend_request
+    server:
+    {
+        "command": "recv_add_friend_request",
+        "from": "[username]",
+        "to": "[username]",
+    }
+    
+// 发送好友请求结果 
+send_add_friend_result
+    client:
+    {
+        "command": "send_add_friend_result",
+        "from": "[username]", // 申请好友方
+        "to": "[username]", // 当前客户端，接受好友申请方
+        "accept": [true | false],
+    }
+    server:
+    {
+        "command": "send_add_friend_result",
+        "status": [true | false],
+        "msg": "..."
+    }
 
+// 接收好友请求结果
+recv_add_friend_result
+    server:
+    {
+        "command": "recv_add_friend_result",
+        "from": "[username]",
+        "to": "[username]",
+        "accept": [true | false],
+    }
+
+// 发送聊天信息
+chat_send_msg
+    client:
+    {
+        "command": "chat_send_msg",
+        "from": "[username]",
+        "to": "[username]",
+        "content": "[msg_content]",
+    }
+    server:
+    {
+        "command": "chat_send_msg",
+        "status": [true | false],
+        "msg": "..."
+    }
+    
+// 接收聊天信息
+chat_recv_msg
+    server:
+    {
+        "command": "chat_recv_msg",
+        "from": "[username]",
+        "to": "[username]",
+        "accept": [true | false],
+    }
+
+// 发送聊天信息
+group_send_msg
+    client:
+    {
+        "command": "group_send_msg",
+        "from": "[username]",
+        "group_id": [group_id],
+        "content": "[msg_content]",
+    }
+    server:
+    {
+        "command": "group_send_msg",
+        "status": [true | false],
+        "msg": "..."
+    }
+
+// 接收群聊信息
+group_recv_msg
+    server:
+    {
+        "command": "group_recv_msg",
+        "from": "[username]",
+        "group_id": [group_id],
+        "content": "[msg_content]",
+    }
+    
+// 聊天发送文件申请
+chat_send_file_begin
+    client:
+    {
+        "command": "chat_send_file_begin",
+        "filename": "[filename]",
+        "from": "[username]",
+        "to": "[username]",
+    }
+    server:
+    {
+        "command": "chat_send_file_begin",
+        "status": [true | false],
+        "fileid": [fileid], // 服务器给文件分配id
+        "msg": "..."
+    }
+
+// 聊天发送文件
+chat_send_file
+    client:
+    {
+        "command": "chat_send_file",
+        "fileid": [fileid], // 申请时服务器返回的文件id
+        "eof": [true | false], // 文件是否读入完成
+        "content": "[filecontent]", // 文件内容
+    }
+    server:
+    {
+        "command": "chat_send_file", 
+        "status": [true | false],
+        "msg": "..."
+    }
 
 ...
