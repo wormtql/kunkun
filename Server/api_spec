@@ -90,23 +90,23 @@ recv_add_friend_request
         "command": "recv_add_friend_request",
         "from": "[username]",
         "to": "[username]",
-        "accept": [true | false],
-    }
-    client:
-    {
-        "command": "recv_add_friend_request",
-        "accept": [true | false],
-        "status": [true | false],
-        "msg": "..."
     }
     
 // 好友请求结果 // 拒绝-单方向发送 & 接受-双方向发送
 add_friend_result
+    client:
+    {
+        "command": "add_friend_result",
+        "from": "[username]",
+        "to": "[username]",
+        "accept": [true | false],
+    }
     server:
     {
         "command": "add_friend_result",
         "from": "[username]",
         "to": "[username]",
+        "accept": [true | false],
     }
     
 // 聊天发送文件申请
