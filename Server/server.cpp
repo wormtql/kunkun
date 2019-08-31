@@ -59,7 +59,7 @@ bool check_login( const json recv_msg )
 
 bool check_password( const json recv_msg )
 {
-    //get username
+    //get username and password
     string username = recv_msg["username"];
     string user_password = recv_msg["password"];
 
@@ -92,20 +92,20 @@ bool rename_group( const json recv_msg )
 
 bool send_add_friend_request( const json recv_msg )
 {
-    string to_name = recv_msg["to_name"];
+    string to_name = recv_msg["to"];
     int to_fd;
     json to_msg;
     to_msg["debug"] = true;
     to_msg["command"] = "recv_add_friend_request";
     to_msg["from"] = recv_msg["from"];
     to_msg["to"] = recv_msg["to"];
-    if( to_fd = username_to_fd["to_name"] )
+    if( to_fd = username_to_fd[to_name] )
     { // onlion operation
         string s = to_msg.dump();
         char *c = s.data();
         int ret = send(fd, c, sizeof(c), 0);
         if( !ret ){
-            printf("send add friend request fail");
+            printf("send add friend request fail\n");
             return 0;
         }
     }
@@ -115,6 +115,79 @@ bool send_add_friend_request( const json recv_msg )
     }
     return 1;
 }
+
+bool send_add_friend_result( const json recv_msg )
+{
+    string to_name = recv_msg["from"];
+    int to_fd;
+    json to_msg;
+    to_msg["debug"] = true;
+    to_msg["command"] = "recv_add_friend_result";
+    to_msg["from"] = recv_msg["from"];
+    to_msg["to"] = recv_msg["to"];
+    to_msg["accept"] = recv_msg["accept"];
+    if( to_fd = username_to_fd[to_name] )
+    { // onlion operation
+        string s = to_msg.dump();
+        char *c = s.data();
+        int ret = send(fd, c, sizeof(c), 0);
+        if( !ret ){
+            printf("send add friend request fail\n");
+            return 0;
+        }
+    }
+    else
+    {
+        // off-line operation
+    }
+
+    if( recv_msg["accept"] == true )
+    {
+        // update friend list with mysql ... mzh
+    }
+
+    return 1;
+}
+
+bool chat_send_msg( const json recv_msg )
+{
+    string to_name = recv_msg["to"];
+    int to_fd;
+    json to_msg;
+    to_msg["debug"] = true;
+    to_msg["command"] = "chat_recv_msg";
+    to_msg["from"] = recv_msg["from"];
+    to_msg["to"] = recv_msg["to"];
+    if( to_fd = username_to_fd[to_name] )
+    { // onlion operation
+        string s = to_msg.dump();
+        char *c = s.data();
+        int ret = send(fd, c, sizeof(c), 0);
+        if( !ret ){
+            printf("send massage from %s to %s fail\n", recv_msg["from"].data(), to_name.data() );
+            return 0;
+        }
+    }
+    else
+    {
+        // off-line operation
+    }
+
+    // update chat history with mysql ... mzh
+
+    return 1;
+}
+
+bool group_send_msg( const json recv_msg )
+{
+    string name = recv_msg["username"];
+    int group_id = recv_msg["group_id"];
+
+    // update group history with mysql ... mzh
+
+    return 1;
+}
+
 
 json init_return_json( const json recv_msg )
 {
@@ -219,28 +292,37 @@ void process_msg( const json recv_msg, const int fd )
     else if( recv_msg["command"] == "create_group" )
     {
         bool creat_group_res = creat_group( ++groupnum, recv_msg );
-        if( creat_group_res ){
+        if( creat_group_res )
+        {
             return_msg["status"] = true;
             return_msg["group_id"] = groupnum;
-        }else{
+        }
+        else
+        {
             return_msg["msg"] = "error with mysql";
         }
     }
     else if( recv_msg["command"] == "rename_group" )
     {
         bool rename_group_res = rename_group( recv_msg );
-        if( rename_group_res ){
+        if( rename_group_res )
+        {
             return_msg["status"] = true;
-        }else{
+        }
+        else
+        {
             return_msg["msg"] = "error with mysql";
         }
     }
     else if( recv_msg["command"] == "send_add_friend_request" )
     {
         bool username_exist = check_username_exist( recv_msg["to"] );
-        if( !username_exist ){
+        if( !username_exist )
+        {
             return_msg["msg"] = recv_msg["to"] + " doesnt exist";
-        }else{
+        }
+        else
+        {
             bool send_add_friend_request_res = send_add_friend_request( recv_msg );
             if( send_add_friend_request_res )
             {
@@ -263,6 +345,38 @@ void process_msg( const json recv_msg, const int fd )
         else
         {
             return_msg["msg"] = "send result failed";
+        }
+    }
+    else if( recv_msg["command"] == "chat_send_msg" )
+    {
+        bool username_exist = check_username_exist( recv_msg["to"] );
+        if( !username_exist )
+        {
+            return_msg["msg"] = recv_msg["to"] + " doesnt exist";
+        }
+        else
+        {
+            bool chat_send_msg_res = chat_send_msg( recv_msg );
+            if( chat_send_msg_res )
+            {
+                return_msg["status"] = true;
+            }
+            else
+            {
+
+            }
+        }
+    }
+    else if( recv_msg["command"] == "group_send_msg" )
+    {
+        bool group_send_msg_res = group_send_msg( recv_msg );
+        if( group_send_msg_res )
+        {
+            return_msg["status"] = true;
+        }
+        else
+        {
+
         }
     }
     else if( recv_msg["command"] == "chat_send_file_begin" )
@@ -361,7 +475,8 @@ int main(int argc, char * argv[]) {
     }
 
     g_thread_new("thread2", thread_func, nullptr);
-
+    // g_thread_new("thread3", file_thread_func, nullptr);
+    
     printf("start accepting\n");
 
     while (1) {
