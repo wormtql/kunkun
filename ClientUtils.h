@@ -20,9 +20,10 @@ public:
     static json create_group_blocked(const std::string & who, const std::string & group_name);
 
 
-    static json rename_group_blocked(int group_id, const std::string & new_name, const std::string who);
+    static json rename_group_blocked(int group_id, const std::string & new_name, const std::string & who);
 
-
+    
+    static json send_add_friend_request_blocked(const std::string & sender, const std::string & recipient);
     // todo ...
 };
 
