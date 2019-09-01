@@ -24,6 +24,21 @@ public:
 
     
     static json send_add_friend_request_blocked(const std::string & sender, const std::string & recipient);
+
+
+    static json send_add_friend_result_blocked(const std::string & applier, const std::string & recipient, bool result);
+
+
+    static json chat_send_msg_blocked(const std::string & sender, const std::string & recipient, const std::string & msg);
+
+
+    static json group_send_msg_blocked(const std::string & sender, const std::string & group_id, const std::string & msg);
+
+
+    static json chat_send_file_begin_blocked(const std::string & sender, const std::string & recipient, const std::string & filename);
+
+
+    static json chat_send_file_blocked(const std::string & file_id, const std::string & file_content, bool eof);
     // todo ...
 };
 
