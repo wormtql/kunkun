@@ -22,6 +22,80 @@ ChatPanel::ChatPanel() {
     this->body = create_body();
 
     gtk_box_pack_start(GTK_BOX(root), body, TRUE, TRUE, 0);
+
+
+//    InvokeData * data = new InvokeData;
+//    data->chat_panel = this;
+//    data->context = g_main_context_get_thread_default();
+
+    GMainContext * context = g_main_context_get_thread_default();
+
+    Thread::set_call_back("chat_recv_msg", [this, context] (str data) {
+
+        json j = json::parse(data);
+        auto d = new InvokeData;
+        d->chat_panel = this;
+        d->context = context;
+        if (j["debug"]) {
+            d->item = R"({"command": "chat_recv_msg",
+                          "from": "user_remote",
+                          "to": "",
+                          "content": {"type": "text", "content": "text test"}})"_json;
+        } else {
+            d->item = j;
+        }
+
+        g_main_context_invoke(context, [] (gpointer user_data) -> gboolean {
+
+            auto data = (InvokeData *)user_data;
+            auto panel = data->chat_panel;
+            auto item = data->item;
+
+
+            if (panel->current_type == "friend" && panel->current_name == item["from"]) {
+                panel->append_chat_item(nullptr, item, item["from"] == DataHub::getIns()->username);
+            } else {
+                panel->mark_new_msg("friend", item["from"]);
+            }
+
+
+            return false;
+        }, d);
+    });
+
+    Thread::set_call_back("group_recv_msg", [this, context] (str data) {
+
+        json j = json::parse(data);
+        auto d = new InvokeData;
+        d->chat_panel = this;
+        d->context = context;
+        if (j["debug"]) {
+            d->item = R"({"command": "chat_recv_msg",
+                          "from": "user_remote",
+                          "group_id": "group_id1",
+                          "content": {"type": "text", "content": "text test"}})"_json;
+        } else {
+            d->item = j;
+        }
+
+        g_main_context_invoke(context, [] (gpointer user_data) -> gboolean {
+
+            auto data = (InvokeData *)user_data;
+            auto panel = data->chat_panel;
+            auto item = data->item;
+
+
+            if (panel->current_type == "group" && panel->current_name == item["group_id"]) {
+                panel->append_chat_item(nullptr, item, item["from"] == DataHub::getIns()->username);
+            } else {
+                panel->mark_new_msg("group", item["group_id"]);
+            }
+
+
+            return false;
+        }, d);
+
+    });
 }
 
 GtkWidget* ChatPanel::widget() {
@@ -324,6 +398,8 @@ void ChatPanel::on_button_side_item_clicked(GtkWidget *widget, gpointer d) {
     auto data = (Data *)d;
     auto panel = data->chat_panel;
 
+    Utils::remove_css_class(widget, "new_msg");
+
     if (panel->current_friend) {
         Utils::remove_css_class(panel->current_friend, "chosen_friend");
         Utils::add_css_class(panel->current_friend, "worm");
@@ -472,6 +548,8 @@ void ChatPanel::refresh_friends_list(json friends, json groups) {
         gtk_container_remove(GTK_CONTAINER(this->side_bar), (GtkWidget *)list->data);
         list = list->next;
     }
+    username_to_widget.clear();
+    group_id_to_widget.clear();
 
 
     // retrieve different tags
@@ -511,6 +589,7 @@ void ChatPanel::refresh_friends_list(json friends, json groups) {
     for (string & s: blacklist)
     {
         GtkWidget * item = create_side_item(nullptr, s.c_str());
+        username_to_widget[s] = item;
         Data * data = new Data;
         data->chat_panel = this;
         data->name = s;
@@ -525,6 +604,7 @@ void ChatPanel::refresh_friends_list(json friends, json groups) {
     for (json & j: groups)
     {
         GtkWidget * item = create_side_item(nullptr, ((string)j["name"]).c_str());
+        group_id_to_widget[(string)j["id"]] = item;
         Data * data = new Data;
         data->chat_panel = this;
         data->name = j["name"];
@@ -539,6 +619,7 @@ void ChatPanel::refresh_friends_list(json friends, json groups) {
     for (string & s: my_friend)
     {
         GtkWidget * item = create_side_item(nullptr, s.c_str());
+        username_to_widget[s] = item;
         Data * data = new Data;
         data->chat_panel = this;
         data->name = s;
@@ -553,6 +634,7 @@ void ChatPanel::refresh_friends_list(json friends, json groups) {
     for (string & s: special)
     {
         GtkWidget * item = create_side_item(nullptr, s.c_str());
+        username_to_widget[s] = item;
         Data * data = new Data;
         data->chat_panel = this;
         data->name = s;
@@ -573,4 +655,16 @@ void ChatPanel::refresh_chat_body() {
 
 void ChatPanel::set_parent_window(GtkWidget *window) {
     this->parent_window = window;
+}
+
+void ChatPanel::mark_new_msg(const std::string &type, const std::string &id) {
+    if (type == "friend") {
+        GtkWidget * widget = username_to_widget[id];
+
+        Utils::add_css_class(widget, "new_msg");
+    } else if (type == "group") {
+        GtkWidget * widget = group_id_to_widget[id];
+
+        Utils::add_css_class(widget, "new_msg");
+    }
 }

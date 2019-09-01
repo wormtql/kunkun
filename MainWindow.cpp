@@ -6,6 +6,10 @@
 
 #include "MainWindow.h"
 
+using std::string;
+using std::cout;
+using std::ofstream;
+
 MainWindow * MainWindow::create() {
     return new MainWindow();
 }
@@ -27,6 +31,54 @@ MainWindow::MainWindow() {
 
     MainWindow::on_button_user_clicked(nullptr, this);
 
+
+    Thread::set_call_back("recv_file", [this] (str data) {
+
+        json j = json::parse(data);
+
+//        cout << "file recv: " + data + "\n";
+
+        cout << "file recv\n";
+
+        ofstream file((string)j["filename"] + "_" + (string)j["fileid"], std::ios::app);
+        file << (string)j["content"];
+
+        if (j["eof"]) {
+            GtkWidget * lbl = gtk_label_new(("文件：" + (string)j["filename"] + " 接收完成").c_str());
+            gtk_widget_set_name(lbl, "top_label");
+
+            gtk_box_pack_start(GTK_BOX(this->top_bar), lbl, TRUE, TRUE, 0);
+            gtk_widget_show_all(lbl);
+
+            g_timeout_add(5000, [] (gpointer data) -> gboolean {
+
+                gtk_widget_destroy((GtkWidget *)data);
+
+                return false;
+            }, lbl);
+        }
+
+    });
+
+    Thread::set_call_back("recv_sys_msg", [this] (str data) {
+        json j = json::parse(data);
+
+        cout << "sys msg: " + (string)j["msg"] << "\n";
+
+        GtkWidget * lbl = gtk_label_new(("系统消息：" + (string)j["msg"]).c_str());
+        gtk_widget_set_name(lbl, "top_label");
+
+        gtk_box_pack_start(GTK_BOX(this->top_bar), lbl, TRUE, TRUE, 0);
+        gtk_widget_show_all(lbl);
+
+        g_timeout_add(5000, [] (gpointer data) -> gboolean {
+
+            gtk_widget_destroy((GtkWidget *)data);
+
+            return false;
+        }, lbl);
+
+    });
 }
 
 

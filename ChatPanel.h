@@ -26,6 +26,13 @@ private:
         std::string file_name;
         std::string file_id;
     };
+
+    // invoke struct
+    struct InvokeData {
+        ChatPanel * chat_panel;
+        GMainContext * context;
+        json item;
+    };
 private:
 
     GtkWidget * parent_window = nullptr;
@@ -35,6 +42,8 @@ private:
 
     // box, friends list
     GtkWidget * side_bar = nullptr;
+    std::map<std::string, GtkWidget *> username_to_widget;
+    std::map<std::string, GtkWidget *> group_id_to_widget;
 
     // box
     GtkWidget * body = nullptr;
@@ -99,6 +108,8 @@ public:
 
     void refresh_chat_body();
 
+
+    void mark_new_msg(str type, str id);
 
 
     void set_parent_window(GtkWidget * window);

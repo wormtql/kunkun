@@ -216,14 +216,22 @@ send_join_group_result
     }
 
 // 接收好友请求结果
-recv_add_friend_result
+// recv_add_friend_result
+//    server:
+//    {
+//        "command": "recv_add_friend_result",
+//        "from": "[username]",
+//        "to": "[username]",
+//        "accept": [true | false],
+//    }
+
+recv_system_msg
     server:
     {
-        "command": "recv_add_friend_result",
-        "from": "[username]",
-        "to": "[username]",
-        "accept": [true | false],
+        "command": "recv_sys_msg",
+        "msg": "[msg]"
     }
+
 
 // 发送聊天信息
 chat_send_msg
@@ -249,7 +257,16 @@ chat_recv_msg
         "from": "[username]",
         "to": "[username]",
         //"accept": [true | false],
-        "content": "[content]"
+        "content": {
+            "type": "file | text",
+
+            // 如果是file
+            "file_name": ...,
+            "file_id": ...,
+
+            // 如果是text
+            "content": "..."
+        }
     }
 
 // 发送聊天信息
@@ -275,7 +292,10 @@ group_recv_msg
         "command": "group_recv_msg",
         "from": "[username]",
         "group_id": [group_id],
-        "content": "[msg_content]",
+        "content": {
+            "type": "text | group",
+            同  chat_recv_msg
+        }
     }
     
 // 聊天发送文件申请

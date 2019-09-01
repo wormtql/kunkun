@@ -2,6 +2,11 @@
 
 #include "LoginWindow.h"
 
+using std::string;
+using std::ofstream;
+using std::cout;
+using std::endl;
+
 static void activate(GtkApplication * app, gpointer data) {
     CssLoader::getIns()->add_css_global("../css/login_window_style.css");
     CssLoader::getIns()->add_css_global("../css/main_window_style.css");
@@ -33,7 +38,6 @@ static void activate(GtkApplication * app, gpointer data) {
 int main(int argc, char * argv[]) {
 
     // init client socket
-//    Client::getIns()->initialize_net(1234, "127.0.0.1");
     Client::getIns()->initialize_net();
 
     // launch thread for listening message

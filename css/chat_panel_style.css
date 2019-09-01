@@ -177,3 +177,7 @@
     background: linear-gradient(45deg, crimson, #ff7640);
     color: white;
 }
+
+#chat_panel .new_msg {
+    background: linear-gradient(45deg, crimson, #ff7640);
+}
