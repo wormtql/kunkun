@@ -34,8 +34,18 @@ map<int, string> fd_to_username;
 map<string, int> username_to_fd;
 // alive socket
 vector<int> alive_socket;
+struct fp_fd{
+    string filename;
+    int fileid;
+    FILE *fp;
+    int fd;
+    fp_fd(){}
+    fp_fd( string filename, int fileid, FILE *fp, int fd ) : filename(filename), fileid(fileid), fp(fp), fd(fd) {}
+};
+vector<file_send> alive_file;
 int lock = 0;
 int groupnum = 0;
+int filenum = 0;
 
 // logout and map_erase
 void check_logout( const int fd ){
@@ -103,7 +113,7 @@ bool send_add_friend_request( const json recv_msg )
     { // onlion operation
         string s = to_msg.dump();
         char *c = s.data();
-        int ret = send(fd, c, sizeof(c), 0);
+        int ret = send(fd, c, strlen(c), 0);
         if( !ret ){
             printf("send add friend request fail\n");
             return 0;
@@ -130,7 +140,7 @@ bool send_add_friend_result( const json recv_msg )
     { // onlion operation
         string s = to_msg.dump();
         char *c = s.data();
-        int ret = send(fd, c, sizeof(c), 0);
+        int ret = send(fd, c, strlen(c), 0);
         if( !ret ){
             printf("send add friend request fail\n");
             return 0;
@@ -162,7 +172,7 @@ bool chat_send_msg( const json recv_msg )
     { // onlion operation
         string s = to_msg.dump();
         char *c = s.data();
-        int ret = send(fd, c, sizeof(c), 0);
+        int ret = send(fd, c, strlen(c), 0);
         if( !ret ){
             printf("send massage from %s to %s fail\n", recv_msg["from"].data(), to_name.data() );
             return 0;
@@ -192,13 +202,28 @@ bool group_send_msg( const json recv_msg )
 json init_return_json( const json recv_msg )
 {
     json j;
-    j["debug"] = true; // 调试时修改
+    j["debug"] = true; // remember to change with debug
     j["command"] = recv_msg["command"];
     j["status"] = flase;
     j["msg"] = "";
     return j;
 }
 
+bool recv_file( const int fileid, const int fd )
+{
+    // require a lock
+
+    char file_url[50] = {0};
+    string filename = find_filename( fileid, file_url ); // with mysql ... mzh
+    FILE *fp = fopen( file_url, "rb" );
+    if(fp == NULL){
+        return 0;
+    }
+    fp_fd new_file( filename, fileid, fp, fd );
+    alive_file.insert( new_file );
+
+    // require a lock
+}
 // bool send_file( const string file_name, const int fd )
 // {
 //     string file_url_s = "files/" + filename;
@@ -381,13 +406,29 @@ void process_msg( const json recv_msg, const int fd )
     }
     else if( recv_msg["command"] == "chat_send_file_begin" )
     {
+        bool file_create_res = file_create( recv_msg["filename"] );
+        if( !file_create_res )
+        {
+            return_msg["msg"] = "fail to send file, try it later";
+        }
+        else
+        {
 
+        }
+    }
+    else if( recv_msg["command"] == "chat_send_file" )
+    {
+
+    }
+    else if( recv_msg["command"] == "send_me_a_file" )
+    {
+        recv_file( recv_msg["fileid"] );
     }
 
     // send massage to client
     string s = return_msg.dump();
     char *c = s.data();
-    int ret = send(fd, c, sizeof(c), 0);
+    int ret = send(fd, c, strlen(c), 0);
     if (ret == -1) {
         printf("send fail\n");
     } else {
@@ -398,6 +439,50 @@ void process_msg( const json recv_msg, const int fd )
 }
 
 const char debug_str[100] = "{\"debug\":true}";
+
+// process file thread function
+void * file_thread_func( void *data )
+{
+    char buffer[1024];
+    int buffer_size;
+    json send_msg;
+    send_msg["command"] = "recv_file";
+    printf("file_thread_started\n");
+    while (1) {
+        // require lock;
+
+        auto iter = alive_file.begin();
+        while( iter != alive_file.end() )
+        {
+            int fd = (*iter).fd;
+            FILE *fp = (*iter).fp;
+            send_msg["filename"] = (*iter).filename;
+            send_msg["fileid"] = (*iter).fileid;
+            buffer_size = fread(buffer, 1, BUF_SIZE, fp);
+            if( buffer_size == 0 )
+            {
+                send_msg["eof"] = true;
+                string s = send_msg.dump();
+                char *c = s.data;
+                send( fd, c, strlen(c), 0 );
+                fclose( fp );
+                alive_file.erase( iter );
+                continue;
+            }
+            else
+            {
+                send_msg["eof"] = false;
+                string s = buffer;
+                send_msg["content"] = s;
+                send( fd, buffer, buffer_size, 0);
+            }
+            iter ++;
+        }
+
+        // require lock
+
+    }
+}
 
 // user functional thread function
 void * thread_func(void * data) {
@@ -434,14 +519,14 @@ void * thread_func(void * data) {
                 printf("recv from socket %d: %s\n", fd, buf);
                 //process_msg( j, fd );
 
-                int ret = send(fd, debug_str, sizeof(debug_str), 0);
+                int ret = send(fd, debug_str, strlen(debug_str), 0);
                 if (ret == -1) {
                     printf("send fail\n");
                 } else {
                     printf("send complete\n");
                 }
             }
-            
+
             iter++;
         }
 
@@ -475,7 +560,7 @@ int main(int argc, char * argv[]) {
     }
 
     g_thread_new("thread2", thread_func, nullptr);
-    // g_thread_new("thread3", file_thread_func, nullptr);
+    g_thread_new("thread3", file_thread_func, nullptr);
     
     printf("start accepting\n");
 
