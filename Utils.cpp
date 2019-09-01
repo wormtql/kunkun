@@ -62,3 +62,14 @@ GdkPixbuf * Utils::get_clipped_image(GdkPixbuf *image, int radius) {
 
     return gdk_pixbuf_get_from_surface(surface, 0, 0, radius, radius);
 }
+
+GdkPixbuf* Utils::load_from_file(const std::string &file, int size) {
+    if (size <= 0)
+    {
+        return gdk_pixbuf_new_from_file(file.c_str(), nullptr);
+    }
+    else
+    {
+        return gdk_pixbuf_new_from_file_at_size(file.c_str(), size, size, nullptr);
+    }
+}

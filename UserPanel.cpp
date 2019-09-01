@@ -50,11 +50,11 @@ GtkWidget* UserPanel::create_user_name_field() {
     gtk_box_pack_start(GTK_BOX(box), label, FALSE, FALSE, 0);
 
 
-    GtkWidget * entry = gtk_entry_new();
-    Utils::add_css_class(entry, "user_panel_entry");
-    g_signal_connect(entry, "activate", G_CALLBACK(UserPanel::on_user_name_enter), this);
-    g_signal_connect(entry, "focus-out-event", G_CALLBACK(UserPanel::on_user_name_enter), this);
-    gtk_box_pack_end(GTK_BOX(box), entry, FALSE, FALSE, 0);
+    entry_username = gtk_entry_new();
+    Utils::add_css_class(entry_username, "user_panel_entry");
+    g_signal_connect(entry_username, "activate", G_CALLBACK(UserPanel::on_user_name_enter), this);
+    g_signal_connect(entry_username, "focus-out-event", G_CALLBACK(UserPanel::on_user_name_enter), this);
+    gtk_box_pack_end(GTK_BOX(box), entry_username, FALSE, FALSE, 0);
 
     return box;
 }
@@ -67,10 +67,11 @@ GtkWidget* UserPanel::create_user_sign_field() {
     Utils::add_css_class(label, "user_panel_label");
     gtk_box_pack_start(GTK_BOX(box), label, FALSE, FALSE, 0);
 
-    GtkWidget * entry = gtk_entry_new();
-    Utils::add_css_class(entry, "user_panel_entry");
-    g_signal_connect(entry, "activate", G_CALLBACK(UserPanel::on_sign_enter), this);
-    gtk_box_pack_end(GTK_BOX(box), entry, FALSE, FALSE, 0);
+    entry_sign = gtk_entry_new();
+    Utils::add_css_class(entry_sign, "user_panel_entry");
+    g_signal_connect(entry_sign, "activate", G_CALLBACK(UserPanel::on_sign_enter), this);
+    g_signal_connect(entry_sign, "focus-out-event", G_CALLBACK(UserPanel::on_sign_enter), this);
+    gtk_box_pack_end(GTK_BOX(box), entry_sign, FALSE, FALSE, 0);
 
     return box;
 }
@@ -83,24 +84,63 @@ GtkWidget* UserPanel::create_gender_field() {
     Utils::add_css_class(label, "user_panel_label");
     gtk_box_pack_start(GTK_BOX(box), label, FALSE, FALSE, 0);
 
-    GtkWidget * entry = gtk_entry_new();
-    Utils::add_css_class(entry, "user_panel_entry");
-    g_signal_connect(entry, "activate", G_CALLBACK(UserPanel::on_gender_enter), this);
-    gtk_box_pack_end(GTK_BOX(box), entry, FALSE, FALSE, 0);
+    entry_gender = gtk_entry_new();
+    Utils::add_css_class(entry_gender, "user_panel_entry");
+    g_signal_connect(entry_gender, "activate", G_CALLBACK(UserPanel::on_gender_enter), this);
+    g_signal_connect(entry_gender, "focus-out-event", G_CALLBACK(UserPanel::on_gender_enter), this);
+    gtk_box_pack_end(GTK_BOX(box), entry_gender, FALSE, FALSE, 0);
 
     return box;
 }
 
 int UserPanel::on_user_name_enter(GtkWidget *widget, gpointer data) {
-    printf("enter\n");
+    auto panel = (UserPanel *)data;
+
+    if (GTK_IS_ENTRY(panel->entry_username)) {
+        std::string val = gtk_entry_get_text(GTK_ENTRY(panel->entry_username));
+        ClientUtils::alter_user_info(DataHub::getIns()->username, "username", val);
+    }
 
     return GDK_EVENT_PROPAGATE;
 }
 
 int UserPanel::on_sign_enter(GtkWidget *widget, gpointer data) {
+    auto panel = (UserPanel *)data;
+
+    if (GTK_IS_ENTRY(panel->entry_sign)) {
+        std::string val = gtk_entry_get_text(GTK_ENTRY(panel->entry_sign));
+        ClientUtils::alter_user_info(DataHub::getIns()->username, "sign", val);
+
+    }
+
     return GDK_EVENT_PROPAGATE;
 }
 
 int UserPanel::on_gender_enter(GtkWidget *widget, gpointer data) {
+    auto panel = (UserPanel *)data;
+//    auto entry = (GtkWidget *)data;
+
+    if (GTK_IS_ENTRY(panel->entry_gender)) {
+        std::string val = gtk_entry_get_text(GTK_ENTRY(panel->entry_gender));
+        ClientUtils::alter_user_info(DataHub::getIns()->username, "gender", val);
+
+    }
+
+//    std::string val = gtk_entry_get_text(GTK_ENTRY(entry));
+//    ClientUtils::alter_user_info(DataHub::getIns()->username, "gender", val);
+
     return GDK_EVENT_PROPAGATE;
+}
+
+void UserPanel::refresh_user_info() {
+    std::string val;
+
+    val = ClientUtils::get_user_info(DataHub::getIns()->username, "username");
+    gtk_entry_set_text(GTK_ENTRY(this->entry_username), val.c_str());
+
+    val = ClientUtils::get_user_info(DataHub::getIns()->username, "sign");
+    gtk_entry_set_text(GTK_ENTRY(this->entry_sign), val.c_str());
+
+    val = ClientUtils::get_user_info(DataHub::getIns()->username, "gender");
+    gtk_entry_set_text(GTK_ENTRY(this->entry_gender), val.c_str());
 }

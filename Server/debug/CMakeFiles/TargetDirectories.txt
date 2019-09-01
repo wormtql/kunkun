@@ -1,0 +1,3 @@
+/home/iatow/CLionProjects/kunkun/Server/debug/CMakeFiles/rebuild_cache.dir
+/home/iatow/CLionProjects/kunkun/Server/debug/CMakeFiles/server.dir
+/home/iatow/CLionProjects/kunkun/Server/debug/CMakeFiles/edit_cache.dir

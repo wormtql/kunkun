@@ -13,7 +13,9 @@ private:
     GtkWidget * root = nullptr;
 
     GtkWidget * avatar;
-    GtkWidget * label_user_name;
+    GtkWidget * entry_username;
+    GtkWidget * entry_sign;
+    GtkWidget * entry_gender;
 
     UserPanel();
 
@@ -32,6 +34,9 @@ public:
     static UserPanel * create();
 
     GtkWidget * widget();
+
+
+    void refresh_user_info();
 };
 
 

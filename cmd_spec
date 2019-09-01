@@ -1,0 +1,59 @@
+del
+    group
+        [group_id]
+        [group_name]
+    friend
+        [username]
+
+set
+    username
+        [new_value]
+    sign
+        [new_value]
+    gender
+        [new_value]
+
+get
+    username
+    sign
+    gender
+
+ls
+    group
+        group_id
+        group_name
+    friend
+        friend_name
+    request
+        f-req   // 收到的好友请求
+        g-inv   // 收到的群组邀请
+        g-req   // 收到的加群请求
+
+msg
+    group
+        group_id
+            msg
+    friend
+        friend_id
+            msg
+
+req
+    add
+        friend
+            username
+        group
+            group_id
+
+res
+    [true | false]
+        f-req   // 接受好友请求
+            username
+        g-inv   // 接受群组邀请
+            group_id
+        g-req   // 接受进群请求
+            username
+                group_id
+
+
+
+clear

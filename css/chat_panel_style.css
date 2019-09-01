@@ -31,6 +31,20 @@
     border-radius: 0;
 }
 
+#chat_panel #side_bar .chat_panel_side_header {
+    /*background: linear-gradient(45deg, crimson, #ff7640);*/
+    color: gray;
+    /*padding: 2px;*/
+    margin: 8px 20px;
+
+    min-height: 32px;
+    /*border-radius: 50%;*/
+
+    border-bottom: 1px solid black;
+
+    /*box-shadow: crimson 0 0 10px 1px;*/
+}
+
 #chat_panel #side_bar button.worm:hover {
     background: rgba(181, 86, 86, 0.48);
 }
@@ -47,7 +61,7 @@
 #chat_panel #chat_panel_chat_body {
     /*background: red;*/
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-    min-height: 300px;
+    min-height: 350px;
 }
 
 #chat_panel #chat_panel_button_set_1 {
@@ -91,14 +105,79 @@
 }
 
 #chat_panel #chat_panel_button_send:hover {
-    background: crimson;
+    /*background: crimson;*/
+    background: linear-gradient(45deg, crimson, #ff7640);
     color: white;
 }
 
-/*#chat_panel .chosen_friend {*/
-    /*min-height: 64px;*/
-    /*border: none;*/
-    /*background: crimson;*/
-    /*transition: 300ms;*/
-    /*border-radius: 0;*/
-/*}*/
+#chat_panel #chat_panel_chat_body_box {
+    /*background: rgba(0, 0, 0, 0.1);*/
+}
+
+#chat_panel .chat_content_left {
+    background: rgba(181, 86, 86, 0.65);
+    margin: 5px 0 5px 12px;
+    padding: 0 12px;
+    border-radius: 5px;
+    color: white;
+}
+
+#chat_panel .chat_avatar_left {
+    margin-left: 24px;
+}
+
+#chat_panel .chat_panel_chat_item {
+    margin: 12px 0;
+}
+
+#chat_panel .chat_content_right {
+    background: rgba(181, 86, 86, 0.65);
+    margin: 5px 12px 5px 0;
+    padding: 0 12px;
+    border-radius: 5px;
+    color: white;
+}
+
+#chat_panel .chat_avatar_right {
+    margin-right: 24px;
+}
+
+#chat_panel .chat_button_file_left {
+    background: rgba(181, 86, 86, 0.65);
+    margin: 5px 0px 5px 12px;
+    padding: 0 12px;
+    border-radius: 5px;
+    color: white;
+    border: none;
+    transition: 300ms;
+}
+
+#chat_panel .chat_button_file_left:hover {
+    /*box-shadow: crimson 0 0 10px 1px;*/
+    background: linear-gradient(45deg, crimson, #ff7640);
+}
+
+#chat_panel .chat_button_file_right {
+    background: rgba(181, 86, 86, 0.65);
+    margin: 5px 12px 5px 0px;
+    padding: 0 12px;
+    border-radius: 5px;
+    color: white;
+    border: none;
+    transition: 300ms;
+}
+
+#chat_panel .chat_button_file_right:hover {
+    background: linear-gradient(45deg, crimson, #ff7640);
+}
+
+#chat_panel #status_bar {
+    margin: 8px 50px;
+    border-radius: 3px;
+    background: linear-gradient(45deg, crimson, #ff7640);
+    color: white;
+}
+
+#chat_panel .new_msg {
+    background: linear-gradient(45deg, crimson, #ff7640);
+}

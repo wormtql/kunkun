@@ -12,18 +12,20 @@ private:
 
     static pthread_t id;
 
-    static SocketCallback callback;
-    static int lock;
+    static SocketCallback chat_recv_msg_cb;
+    static SocketCallback group_recv_msg_cb;
+    static SocketCallback recv_sys_msg_cb;
+    static SocketCallback recv_file_cb;
 
-    static int stop;
 
     static GMutex mutex;
 
-//    Thread() = default;
+
 
     static void * service_func(void *);
 
 public:
+    static SocketCallback default_cb;
 
     static void init();
 
@@ -31,7 +33,7 @@ public:
 
     static void resume_recv();
 
-//    static void set_call_back(SocketCallback callback);
+    static void set_call_back(str type, SocketCallback callback);
 
     static void kill();
 };
