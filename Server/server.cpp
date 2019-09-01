@@ -34,7 +34,7 @@ map<int, string> fd_to_username;
 map<string, int> username_to_fd;
 // alive socket
 vector<int> alive_socket;
-<<<<<<< HEAD
+
 struct fp_fd{
     string filename;
     int fileid;
@@ -43,12 +43,10 @@ struct fp_fd{
     fp_fd(){}
     fp_fd( string filename, int fileid, FILE *fp, int fd ) : filename(filename), fileid(fileid), fp(fp), fd(fd) {}
 };
-vector<file_send> alive_file;
-int lock = 0;
-=======
+vector<fp_fd> alive_file;
+//int lock = 0;
 
 GMutex alive_socket_mutex;
->>>>>>> 49d5087daff27d717687d9f237b33c3b0f44cd40
 int groupnum = 0;
 int filenum = 0;
 
@@ -117,28 +115,24 @@ bool rename_group( const json recv_msg )
 bool send_add_friend_request( const json recv_msg )
 {
     string to_name = recv_msg["to"];
-    int to_fd;
     json to_msg;
     to_msg["debug"] = true;
     to_msg["command"] = "recv_add_friend_request";
     to_msg["from"] = recv_msg["from"];
     to_msg["to"] = recv_msg["to"];
-//    if( to_fd = username_to_fd[to_name] )
     if (username_to_fd.find(to_name) != username_to_fd.end())
     { // online operation
 
         // 如果对方在线就发给对方
 
         string s = to_msg.dump();
-<<<<<<< HEAD
         char *c = s.data();
         int ret = send(fd, c, strlen(c), 0);
-=======
+
 
         int fd = username_to_fd[to_name];
 
         int ret = send(fd, s.c_str(), sizeof(char) * s.size(), 0);
->>>>>>> 49d5087daff27d717687d9f237b33c3b0f44cd40
         if( !ret ){
             printf("send add friend request fail\n");
             return 0;
@@ -155,27 +149,22 @@ bool send_add_friend_request( const json recv_msg )
 bool send_add_friend_result( const json recv_msg )
 {
     string to_name = recv_msg["from"];
-    int to_fd;
     json to_msg;
     to_msg["debug"] = true;
     to_msg["command"] = "recv_add_friend_result";
     to_msg["from"] = recv_msg["from"];
     to_msg["to"] = recv_msg["to"];
     to_msg["accept"] = recv_msg["accept"];
-//    if( to_fd = username_to_fd[to_name] )
+
     if (username_to_fd.find(to_name) != username_to_fd.end())
     { // online operation
         string s = to_msg.dump();
-<<<<<<< HEAD
         char *c = s.data();
         int ret = send(fd, c, strlen(c), 0);
-=======
 
         int fd = username_to_fd[to_name];
 
-//        char *c = s.data();
         int ret = send(fd, s.c_str(), sizeof(char) * s.size(), 0);
->>>>>>> 49d5087daff27d717687d9f237b33c3b0f44cd40
         if( !ret ){
             printf("send add friend request fail\n");
             return 0;
@@ -197,26 +186,22 @@ bool send_add_friend_result( const json recv_msg )
 bool chat_send_msg( const json recv_msg )
 {
     string to_name = recv_msg["to"];
-    int to_fd;
     json to_msg;
     to_msg["debug"] = true;
     to_msg["command"] = "chat_recv_msg";
     to_msg["from"] = recv_msg["from"];
     to_msg["to"] = recv_msg["to"];
     to_msg["content"] = recv_msg["content"];
-    if( to_fd = username_to_fd[to_name] )
+    if( username_to_fd.find(to_name) != username_to_fd.end() )
     { // onlion operation
         string s = to_msg.dump();
-<<<<<<< HEAD
         char *c = s.data();
         int ret = send(fd, c, strlen(c), 0);
-=======
 
         int fd = username_to_fd[to_name];
 
-//        char *c = s.data();
         int ret = send(fd, s.c_str(), sizeof(char) * s.size(), 0);
->>>>>>> 49d5087daff27d717687d9f237b33c3b0f44cd40
+
         if( !ret ){
             printf("send massage from %s to %s fail\n", ((string)recv_msg["from"]).c_str(), to_name.data() );
             return 0;
@@ -469,11 +454,9 @@ void process_msg( const json recv_msg, const int fd )
     {
 
     }
-<<<<<<< HEAD
-    else if( recv_msg["command"] == "send_me_a_file" )
-    {
-        recv_file( recv_msg["fileid"] );
-=======
+    else if( recv_msg["command"] == "send_me_a_file" ) {
+        recv_file(recv_msg["fileid"]);
+    }
     else if ( cmd == "send_join_group_request" )
     {
 
@@ -497,18 +480,13 @@ void process_msg( const json recv_msg, const int fd )
     else if (cmd == "chat_send_file")
     {
 
->>>>>>> 49d5087daff27d717687d9f237b33c3b0f44cd40
     }
 
     // send massage to client
     string s = return_msg.dump();
-<<<<<<< HEAD
     char *c = s.data();
     int ret = send(fd, c, strlen(c), 0);
-=======
-//    char *c = s.data();
     int ret = send(fd, s.c_str(), sizeof(char) * s.size(), 0);
->>>>>>> 49d5087daff27d717687d9f237b33c3b0f44cd40
     if (ret == -1) {
         printf("send fail\n");
     } else {
