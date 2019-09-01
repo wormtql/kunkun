@@ -304,11 +304,13 @@ void ChatPanel::on_button_send_clicked(GtkWidget *widget, gpointer data) {
     // send
     if (type == "friend")
     {
-        ClientUtils::send_text_to_friend(DataHub::getIns()->username, id, text);
+//        ClientUtils::send_text_to_friend(DataHub::getIns()->username, id, text);
+        ClientUtils::chat_send_msg(DataHub::getIns()->username, id, text);
     }
     else if (type == "group")
     {
-        ClientUtils::send_text_to_group(DataHub::getIns()->username, id, text);
+//        ClientUtils::send_text_to_group(DataHub::getIns()->username, id, text);
+        ClientUtils::group_send_msg(DataHub::getIns()->username, id, text);
     }
     panel->refresh_chat_body();
 }

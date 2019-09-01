@@ -15,12 +15,12 @@ json ClientUtils::login_blocked(const std::string &username, const std::string &
     Thread::stop_recv();
 
     json j;
-
     j["command"] = "login";
     j["username"] = username;
     j["password"] = password;
 
     Client::getIns()->send_string(j.dump());
+
 
     Client::getIns()->recv_blocked(buf);
 
@@ -31,7 +31,10 @@ json ClientUtils::login_blocked(const std::string &username, const std::string &
     return json::parse(buf);
 }
 
+// 阻塞的 signup
 json ClientUtils::signup_blocked(const std::string &username, const std::string &password) {
+    // 阻塞接收
+
     Thread::stop_recv();
 
     json j;
@@ -43,7 +46,9 @@ json ClientUtils::signup_blocked(const std::string &username, const std::string 
 
     Client::getIns()->recv_blocked(buf);
 
+
     Thread::resume_recv();
+
 
     return json::parse(buf);
 }
@@ -68,7 +73,7 @@ json ClientUtils::get_list_user_like_blocked(const std::string &query_str) {
     }
     else
     {
-        return retj["data"];
+        return retj["list"];
     }
 }
 
@@ -93,7 +98,7 @@ json ClientUtils::get_list_group_like_blocked(const std::string &query_str) {
     }
     else
     {
-        return retj["data"];
+        return retj["list"];
     }
 }
 
@@ -118,7 +123,7 @@ json ClientUtils::get_friends(const std::string &who)
     }
     else
     {
-        return retj["data"];
+        return retj["list"];
     }
 }
 
@@ -142,38 +147,38 @@ json ClientUtils::get_groups(const std::string &who) {
     }
     else
     {
-        return retj["data"];
+        return retj["list"];
     }
 }
 
-void ClientUtils::send_text_to_friend(const std::string &from, const std::string &to, const std::string &content) {
-    Thread::stop_recv();
+//void ClientUtils::send_text_to_friend(const std::string &from, const std::string &to, const std::string &content) {
+//    Thread::stop_recv();
+//
+//    json j;
+//    j["command"] = "send_text_to_friend";
+//    j["from"] = from;
+//    j["to"] = to;
+//    j["content"] = content;
+//
+//    Client::getIns()->send_string(j.dump());
+//
+//    Thread::resume_recv();
+//}
 
-    json j;
-    j["command"] = "send_text_to_friend";
-    j["from"] = from;
-    j["to"] = to;
-    j["content"] = content;
-
-    Client::getIns()->send_string(j.dump());
-
-    Thread::resume_recv();
-}
-
-void ClientUtils::send_text_to_group(const std::string &from, const std::string &group_id,
-                                     const std::string &content) {
-    Thread::stop_recv();
-
-    json j;
-    j["command"] = "send_text_to_group";
-    j["from"] = from;
-    j["to"] = group_id;
-    j["content"] = content;
-
-    Client::getIns()->send_string(j.dump());
-
-    Thread::resume_recv();
-}
+//void ClientUtils::send_text_to_group(const std::string &from, const std::string &group_id,
+//                                     const std::string &content) {
+//    Thread::stop_recv();
+//
+//    json j;
+//    j["command"] = "send_text_to_group";
+//    j["from"] = from;
+//    j["to"] = group_id;
+//    j["content"] = content;
+//
+//    Client::getIns()->send_string(j.dump());
+//
+//    Thread::resume_recv();
+//}
 
 json ClientUtils::get_chat_friend_history(const std::string &from, const std::string &user) {
     Thread::stop_recv();
@@ -228,7 +233,7 @@ json ClientUtils::get_chat_group_history(const std::string &from, const std::str
     }
 }
 
-json ClientUtils::alter_user_info(const std::string &who, const std::string &field, const std::string new_val) {
+json ClientUtils::alter_user_info(const std::string &who, const std::string &field, const std::string & new_val) {
     Thread::stop_recv();
 
     json j;
@@ -272,7 +277,62 @@ std::string ClientUtils::get_user_info(const std::string &who, const std::string
     }
 }
 
-void ClientUtils::request_add_friend(const std::string &from, const std::string &to) {
+//void ClientUtils::request_add_friend(const std::string &from, const std::string &to) {
+//
+//}
+
+
+// 阻塞的 create group
+json ClientUtils::create_group_blocked(const std::string &who, const std::string &group_name) {
+    // 阻塞接收
+
+    Thread::stop_recv();
+
+    json j;
+    j["command"] = "create_group";
+    j["who"] = who;
+    j["group_name"] = group_name;
+
+    Client::getIns()->send_string(j.dump());
+
+    char buf[CLIENT_BUF_SIZE];
+    Client::getIns()->recv_blocked(buf);
+
+
+    Thread::resume_recv();
+
+
+    return json::parse(buf);
+}
+
+// 阻塞的 rename group
+json ClientUtils::rename_group_blocked(int group_id, const std::string &new_name, const std::string & who) {
+    // 阻塞接收
+
+    Thread::stop_recv();
+
+    json j;
+    j["command"] = "rename_group";
+    j["who"] = who;
+    j["group_id"] = group_id;
+    j["new_name"] = new_name;
+
+    Client::getIns()->send_string(j.dump());
+
+    char buf[CLIENT_BUF_SIZE];
+    Client::getIns()->recv_blocked(buf);
+
+
+    Thread::resume_recv();
+
+
+    return json::parse(buf);
+}
+
+// 阻塞的 send ad friend request
+json ClientUtils::send_add_friend_request(const std::string &from, const std::string & to) {
+    // 阻塞接收
+
     Thread::stop_recv();
 
     json j;
@@ -498,6 +558,52 @@ json ClientUtils::send_join_group_result(const std::string &who, const std::stri
     Client::getIns()->recv_blocked(buf);
 
     Thread::resume_recv();
+
+    return json::parse(buf);
+}
+
+// 阻塞的 send chat msg
+json ClientUtils::chat_send_msg(const std::string & from, const std::string & to, const std::string & msg) {
+    // 阻塞接收
+    Thread::stop_recv();
+
+    json j;
+    j["command"] = "chat_send_msg";
+    j["from"] = from;
+    j["to"] = to;
+    j["content"] = msg;
+
+    Client::getIns()->send_string(j.dump());
+
+//    char buf[CLIENT_BUF_SIZE];
+    Client::getIns()->recv_blocked(buf);
+
+
+    Thread::resume_recv();
+
+
+    return json::parse(buf);
+}
+
+// 阻塞的 group send msg
+json ClientUtils::group_send_msg(const std::string & from, const std::string & group_id, const std::string & msg) {
+    // 阻塞接收
+    Thread::stop_recv();
+
+    json j;
+    j["command"] = "group_send_msg";
+    j["from"] = from;
+    j["group_id"] = group_id;
+    j["content"] = msg;
+
+    Client::getIns()->send_string(j.dump());
+
+//    char buf[CLIENT_BUF_SIZE];
+    Client::getIns()->recv_blocked(buf);
+
+
+    Thread::resume_recv();
+
 
     return json::parse(buf);
 }

@@ -172,7 +172,8 @@ void AddFriendPanel::on_button_add_friend_clicked(GtkWidget *widget, gpointer us
 
     if (data->type == "friend")
     {
-        ClientUtils::request_add_friend(DataHub::getIns()->username, data->id);
+//        ClientUtils::request_add_friend(DataHub::getIns()->username, data->id);
+        ClientUtils::send_add_friend_request(DataHub::getIns()->username, data->id);
     }
     else if (data->type == "group")
     {

@@ -50,7 +50,7 @@ typedef const std::string & str;
 #include "Thread.h"
 #include "SendFileUtils.h"
 
-#define BUF_SIZE 256
+#define CLIENT_BUF_SIZE 256
 #define MSG_SIZE 256
 #define FILE_BLOCK_SIZE 256
 
