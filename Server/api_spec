@@ -185,6 +185,36 @@ send_add_friend_result
         "msg": "..."
     }
 
+// 发送邀请加群结果
+send_invite_to_group_result
+    client:
+    {
+        "command": ..,
+        // 被邀请者
+        "whom": "username",
+        "group_id": "...",
+        // 注意不是字符串
+        "accept": [true | false]
+    }
+    server:
+    {
+        ...
+    }
+
+send_join_group_result
+    client:
+    {
+        "command": ...,
+        申请加群的人
+        "who": ...,
+        "group_id": ...,
+        "accept": [true | false]
+    }
+    server:
+    {
+        ...
+    }
+
 // 接收好友请求结果
 recv_add_friend_result
     server:
@@ -218,7 +248,8 @@ chat_recv_msg
         "command": "chat_recv_msg",
         "from": "[username]",
         "to": "[username]",
-        "accept": [true | false],
+        //"accept": [true | false],
+        "content": "[content]"
     }
 
 // 发送聊天信息
@@ -260,6 +291,7 @@ chat_send_file_begin
     {
         "command": "chat_send_file_begin",
         "status": [true | false],
+        "filename": "[filename]",
         "fileid": [fileid], // 服务器给文件分配id
         "msg": "..."
     }
@@ -278,6 +310,166 @@ chat_send_file
         "command": "chat_send_file", 
         "status": [true | false],
         "msg": "..."
+    }
+
+
+group_send_file_begin
+    client:
+    {
+        "command": "group_send_file_begin",
+        "filename": "[filename]",
+        "from": "[username]",
+        "group_id": "[..]",
+    }
+    server:
+    {
+        "command": "...",
+        "status": ...,
+        "msg": ...,
+        "filename": "...",
+        "file_id": "...",
+    }
+
+// 与chat_send_file一样，command也一样
+group_send_file
+
+
+send_me_a_file
+    client:
+    {
+        "command": "...",
+        "fileid": "..."
+    }
+    server
+    {
+        ...
+    }
+
+
+// 客户端收取文件
+recv_file
+    server
+    {
+        "command": "recv_file",
+        "filename": "...",
+        "fileid": "...",
+        "content": "...",
+        "eof": ...
+    }
+
+// 某人收到的加好友请求
+list_friend_request
+    client
+    {
+        "command": ...,
+        "username": "[username]"
+    }
+    server
+    {
+        "command": ...,
+        "status": ...,
+        "msg": ...,
+        "list":
+        [
+            "username1",
+            "username2",
+            ...
+        ]
+    }
+
+// 某人收到的邀请进群请求
+list_group_invitation
+    client
+    {
+        "command": ...,
+        "username": ...,
+    }
+    server
+    {
+        "command": ...,
+        "status": ...,
+        "msg": ...,
+        "list":
+        [
+            {
+                "name": "groupname1",
+                "id": "groupid1",
+                "boss": "[username]"
+            },
+            {
+                "name": "groupname2",
+                "id": "groupid2",
+                "boss": "[username]"
+            }
+            ...
+        ]
+    }
+
+
+// 群主收到的加群请求
+list_group_request
+    client:
+    {
+        "command": ...,
+        "username": ...,
+    }
+    server
+    {
+        "command": ...,
+        "status": ...,
+        "msg": ...,
+        "list":
+        [
+            {
+                // 谁申请的
+                "username": ...,
+                // 申请加到哪个群
+                "group_id": ...
+            },
+            ...
+        ]
+    }
+
+get_chat_friend_history
+    client:
+    {
+        // from 到 user 的聊天记录
+        "command": ...,
+        "from": ...,
+        "user": ...,
+    }
+    server:
+    {
+        "command": ...,
+        "status": ...,
+        "msg": ...,
+        "list":
+        [
+            {
+                "name": "username",
+                "type": "text",
+                "content": "hello!"
+            },
+            {
+                "name": "username",
+                "type": "file",
+                "file_id": "file_id",
+                "file_name": "file_name"
+            },
+            ...
+        ]
+    }
+
+get_chat_group_history
+    client:
+    {
+        "command": ...,
+        "from": ...,
+        "group_id": "group_id"
+    }
+    server
+    {
+        格式同上
     }
 
 ...

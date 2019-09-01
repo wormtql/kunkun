@@ -197,7 +197,7 @@ json ClientUtils::get_chat_friend_history(const std::string &from, const std::st
     }
     else
     {
-        return retj["data"];
+        return retj["list"];
     }
 }
 
@@ -224,7 +224,7 @@ json ClientUtils::get_chat_group_history(const std::string &from, const std::str
     }
     else
     {
-        return retj["data"];
+        return retj["list"];
     }
 }
 
@@ -300,4 +300,204 @@ void ClientUtils::request_join_group(const std::string &from, const std::string 
     Client::getIns()->recv_blocked(buf);
 
     Thread::resume_recv();
+}
+
+void ClientUtils::chat_send_file_begin(const std::string &from, const std::string &to, const std::string &filename,
+        SocketCallback callback) {
+    Thread::stop_recv();
+
+    json j;
+    j["command"] = "chat_send_file_begin";
+    j["from"] = from;
+    j["to"] = to;
+    j["filename"] = filename;
+
+    Client::getIns()->send_string(j.dump());
+
+    Client::getIns()->recv_blocked(buf);
+
+    Thread::resume_recv();
+
+    callback(buf);
+}
+
+void ClientUtils::chat_send_file(const std::string &file_id, bool eof, const std::string &content) {
+    Thread::stop_recv();
+
+    json j;
+    j["command"] = "chat_send_file";
+    j["eof"] = eof;
+    j["content"] = content;
+
+    Client::getIns()->send_string(j.dump());
+
+    Client::getIns()->recv_blocked(buf);
+
+    Thread::resume_recv();
+}
+
+void ClientUtils::group_send_file_begin(const std::string &from, const std::string &group_id,
+                                        const std::string &filename, SocketCallback callback) {
+    Thread::stop_recv();
+
+    json j;
+    j["command"] = "group_send_file_begin";
+    j["from"] = from;
+    j["group_id"] = group_id;
+    j["filename"] = filename;
+
+    Client::getIns()->send_string(j.dump());
+
+    Client::getIns()->recv_blocked(buf);
+
+    Thread::resume_recv();
+
+    callback(buf);
+}
+
+void ClientUtils::send_me_a_file(const std::string &fileid) {
+    Thread::stop_recv();
+
+    json j;
+    j["command"] = "send_me_a_file";
+    j["fileid"] = fileid;
+
+    Client::getIns()->send_string(j.dump());
+
+    Client::getIns()->recv_blocked(buf);
+
+    Thread::resume_recv();
+}
+
+json ClientUtils::list_friend_request(const std::string &username) {
+    Thread::stop_recv();
+
+    json j;
+    j["command"] = "list_friend_request";
+    j["username"] = username;
+
+    Client::getIns()->send_string(j.dump());
+
+    Client::getIns()->recv_blocked(buf);
+
+    Thread::resume_recv();
+
+    json retj = json::parse(buf);
+
+    if (retj["debug"]) {
+        return R"(["user1", "user2"])"_json;
+    } else {
+        return retj["list"];
+    }
+}
+
+json ClientUtils::list_group_invitation(const std::string &username) {
+    Thread::stop_recv();
+
+    json j;
+    j["command"] = "list_group_invitation";
+    j["username"] = username;
+
+    Client::getIns()->send_string(j.dump());
+
+    Client::getIns()->recv_blocked(buf);
+
+    Thread::resume_recv();
+
+    json retj = json::parse(buf);
+
+    if (retj["debug"]) {
+        return R"([
+                    {
+                "name": "groupname1",
+                "id": "groupid1",
+                "boss": "[username]"
+            },
+            {
+                "name": "groupname2",
+                "id": "groupid2",
+                "boss": "[username]"
+            }])"_json;
+    } else {
+        return retj["list"];
+    }
+}
+
+json ClientUtils::list_group_request(const std::string &username) {
+    Thread::stop_recv();
+
+    json j;
+    j["command"] = "list_friend_request";
+    j["username"] = username;
+
+    Client::getIns()->send_string(j.dump());
+
+    Client::getIns()->recv_blocked(buf);
+
+    Thread::resume_recv();
+
+    json retj = json::parse(buf);
+
+    if (retj["debug"]) {
+        return R"([{
+                    "username": "user1",
+                    "group_id": "group_id1"
+                    }])"_json;
+    } else {
+        return retj["list"];
+    }
+}
+
+json ClientUtils::send_add_friend_result(const std::string &from, const std::string &to, bool accept) {
+    Thread::stop_recv();
+
+    json j;
+    j["command"] = "send_add_friend_result";
+    j["from"] = from;
+    j["to"] = to;
+    j["accept"] = accept;
+
+    Client::getIns()->send_string(j.dump());
+
+    Client::getIns()->recv_blocked(buf);
+
+    Thread::resume_recv();
+
+    return json::parse(buf);
+}
+
+json ClientUtils::send_invite_to_group_result(const std::string &whom, const std::string &group_id, bool accept) {
+    Thread::stop_recv();
+
+    json j;
+    j["command"] = "send_invite_to_group_result";
+    j["whom"] = whom;
+    j["group_id"] = group_id;
+    j["accept"] = accept;
+
+    Client::getIns()->send_string(j.dump());
+
+    Client::getIns()->recv_blocked(buf);
+
+    Thread::resume_recv();
+
+    return json::parse(buf);
+}
+
+json ClientUtils::send_join_group_result(const std::string &who, const std::string &group_id, bool accept) {
+    Thread::stop_recv();
+
+    json j;
+    j["command"] = "send_join_group_result";
+    j["who"] = who;
+    j["group_id"] = group_id;
+    j["accept"] = accept;
+
+    Client::getIns()->send_string(j.dump());
+
+    Client::getIns()->recv_blocked(buf);
+
+    Thread::resume_recv();
+
+    return json::parse(buf);
 }

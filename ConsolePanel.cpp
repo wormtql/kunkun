@@ -95,6 +95,8 @@ void ConsolePanel::process_command(const std::string &cmd) {
     }
 
 
+    bool too_few_arg_flag = false;
+
     // todo
     // parse argument here
     if (argv[0] == "del")
@@ -115,7 +117,33 @@ void ConsolePanel::process_command(const std::string &cmd) {
     }
     else if (argv[0] == "ls")
     {
+        if (argv.size() <= 1)
+            too_few_arg_flag = true;
+        else {
+            if (argv[1] == "request") {
+                if (argv.size() <= 2) {
+                    too_few_arg_flag = true;
+                } else {
+                    if (argv[2] == "f-req") {
+                        json ret = ClientUtils::list_friend_request(DataHub::getIns()->username);
+                        my_print(ret.dump(4));
+                        my_print("\n");
+                    } else if (argv[2] == "g-inv") {
+                        json ret = ClientUtils::list_group_invitation(DataHub::getIns()->username);
+                        my_print(ret.dump(4));
+                        my_print("\n");
+                    } else if (argv[2] == "g-req") {
+                        json ret = ClientUtils::list_group_request(DataHub::getIns()->username);
+                        my_print(ret.dump(4));
+                        my_print("\n");
+                    }
+                }
+            } else if (argv[1] == "friend") {
 
+            } else if (argv[1] == "group") {
+
+            }
+        }
     }
     else if (argv[0] == "msg")
     {
@@ -125,13 +153,55 @@ void ConsolePanel::process_command(const std::string &cmd) {
     {
 
     }
-    else if (argv[0] == "rec")
+    else if (argv[0] == "res")
     {
+        if (argv.size() <= 1) {
+            too_few_arg_flag = true;
+        }
+        else {
+            bool ans = false;
+            if (argv[1] == "true") {
+                ans = true;
+            } else if (argv[1] == "false") {
+                ans = false;
+            } else {
+                my_print("res [true | false] options\n");
+                return;
+            }
 
-    }
-    else if (argv[0] == "dec")
-    {
+            if (argv.size() < 3) {
+                too_few_arg_flag = true;
+            } else {
+                if (argv[2] == "f-req") {
 
+                    if (argv.size() < 4) {
+                        too_few_arg_flag = true;
+                    } else {
+                        ClientUtils::send_add_friend_result(DataHub::getIns()->username, argv[3], ans);
+                        my_print("sent\n");
+                    }
+
+                } else if (argv[2] == "g-req") {
+
+                    if (argv.size() < 4) {
+                        too_few_arg_flag = true;
+                    } else {
+                        ClientUtils::send_invite_to_group_result(DataHub::getIns()->username, argv[3], ans);
+                        my_print("sent\n");
+                    }
+
+                } else if (argv[2] == "g-inv") {
+
+                    if (argv.size() < 5) {
+                        too_few_arg_flag = true;
+                    } else {
+                        ClientUtils::send_join_group_result(argv[3], argv[4], ans);
+                        my_print("sent\n");
+                    }
+
+                }
+            }
+        }
     }
     else if (argv[0] == "clear")
     {

@@ -114,6 +114,7 @@ void MainWindow::on_button_friend_clicked(GtkWidget *widget, gpointer data) {
 
     if (!window->chat_panel) {
         window->chat_panel = ChatPanel::create();
+        window->chat_panel->set_parent_window(window->window);
         gtk_box_pack_start(GTK_BOX(window->body), window->chat_panel->widget(), TRUE, TRUE, 0);
     }
 

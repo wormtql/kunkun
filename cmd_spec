@@ -44,23 +44,16 @@ req
         group
             group_id
 
-rec
-    f-req   // 接受好友请求
-        username
-    g-inv   // 接受群组邀请
-        group_id
-    g-req   // 接受进群请求
-        username
+res
+    [true | false]
+        f-req   // 接受好友请求
+            username
+        g-inv   // 接受群组邀请
             group_id
+        g-req   // 接受进群请求
+            username
+                group_id
 
-dec
-    f-req   // 拒绝好友请求
-        username
-    g-inv   // 拒绝群组邀请
-        group_id
-    g_req   // 拒绝加群请求
-        username
-            group_id
 
 
 clear

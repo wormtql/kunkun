@@ -13,6 +13,7 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+#include <ios>
 #include <vector>
 #include <functional>
 #include <cctype>
@@ -25,11 +26,14 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
+#include <mysql/mysql.h>
 
 #include "json.hpp"
 
 
 typedef std::function<void (const std::string &)> SocketCallback;
+typedef std::function<void (double)> FileSendCallback;
+typedef const std::string & str;
 
 
 #include "DataHub.h"
@@ -44,6 +48,7 @@ typedef std::function<void (const std::string &)> SocketCallback;
 #include "MainWindow.h"
 #include "ClientUtils.h"
 #include "Thread.h"
+#include "SendFileUtils.h"
 
 #define BUF_SIZE 256
 #define MSG_SIZE 256

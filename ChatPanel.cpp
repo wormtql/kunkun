@@ -118,12 +118,18 @@ GtkWidget* ChatPanel::create_body() {
     return body;
 }
 
+
+/*
+ * create button set 1
+ *
+ */
 GtkWidget* ChatPanel::create_button_set_1() {
     GtkWidget * box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_widget_set_name(box, "chat_panel_button_set_1");
 
     GtkWidget * button_file = gtk_button_new_from_icon_name("go_left", GTK_ICON_SIZE_BUTTON);
     gtk_widget_set_name(button_file, "chat_panel_button_file");
+
     g_signal_connect(button_file, "clicked", G_CALLBACK(ChatPanel::on_button_file_clicked), this);
 
     GtkWidget * button_image = gtk_button_new_from_icon_name("go_left", GTK_ICON_SIZE_BUTTON);
@@ -136,21 +142,129 @@ GtkWidget* ChatPanel::create_button_set_1() {
     return box;
 }
 
+
+/*
+ * create button set 2
+ *
+ */
 GtkWidget* ChatPanel::create_button_set_2() {
-    GtkWidget * box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-    gtk_widget_set_name(box, "chat_panel_button_set_2");
+    button_set_2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    gtk_widget_set_name(button_set_2, "chat_panel_button_set_2");
 
     GtkWidget * button_send = gtk_button_new_with_label("send");
     gtk_widget_set_name(button_send, "chat_panel_button_send");
     g_signal_connect(button_send, "clicked", G_CALLBACK(ChatPanel::on_button_send_clicked), this);
 
-    gtk_box_pack_end(GTK_BOX(box), button_send, FALSE, FALSE, 0);
+    gtk_box_pack_end(GTK_BOX(button_set_2), button_send, FALSE, FALSE, 0);
 
-    return box;
+
+//    progress_bar = gtk_progress_bar_new();
+//    gtk_widget_set_name(progress_bar, "progress_bar");
+//    gtk_box_pack_start(GTK_BOX(button_set_2), progress_bar, TRUE, TRUE, 0);
+//    gtk_widget_show_all(panel->progress_bar);
+
+    return button_set_2;
 }
 
+
+/*
+ * send file
+ *
+ */
 void ChatPanel::on_button_file_clicked(GtkWidget *widget, gpointer data) {
-    printf("aaa\n");
+//    printf("aaa\n");
+
+    auto panel = (ChatPanel *)data;
+
+    GtkWidget * dialog;
+    GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_OPEN;
+
+    dialog = gtk_file_chooser_dialog_new(
+            "Open File",
+            GTK_WINDOW(panel->parent_window),
+            action,
+            "Cancel",
+            GTK_RESPONSE_CANCEL,
+            "Open",
+            GTK_RESPONSE_ACCEPT,
+            NULL);
+
+    int res = gtk_dialog_run(GTK_DIALOG(dialog));
+    if (res == GTK_RESPONSE_ACCEPT)
+    {
+        char * filename;
+        GtkFileChooser * chooser = GTK_FILE_CHOOSER(dialog);
+        filename = gtk_file_chooser_get_filename(chooser);
+
+        printf("%s\n", filename);
+
+        if (panel->current_type == "friend") {
+            std::string fileid;
+            bool status = false;
+            ClientUtils::chat_send_file_begin(DataHub::getIns()->username, panel->current_name, filename,
+                    [&fileid, &status] (str ret) {
+                json j = json::parse(ret);
+
+                if (j["debug"]) {
+                    fileid = "debug";
+                    status = true;
+                } else {
+                    fileid = j["fileid"];
+                    status = j["status"];
+                }
+
+            });
+
+            if (status) {
+                SendFileUtils::send_file(filename, fileid, [&panel] (double rate) {
+                    printf("%lf\n", rate);
+
+                    if (rate >= 1.0) {
+
+                        if (panel->status_bar == nullptr) {
+                            panel->status_bar = gtk_label_new("文件发送完成");
+                            gtk_widget_set_name(panel->status_bar, "status_bar");
+                            gtk_box_pack_start(GTK_BOX(panel->button_set_2), panel->status_bar, TRUE, TRUE, 0);
+                            gtk_widget_show_all(panel->status_bar);
+                        }
+
+                        g_timeout_add(5000, [] (gpointer user_data) -> gboolean {
+
+                            auto p = (ChatPanel *)user_data;
+                            gtk_widget_destroy(p->status_bar);
+                            p->status_bar = nullptr;
+
+                        }, panel);
+                    }
+                });
+            } else {
+                printf("error in send file\n");
+            }
+        } else if (panel->current_type == "group") {
+
+            std::string fileid;
+            bool status = false;
+            ClientUtils::group_send_file_begin(DataHub::getIns()->username, panel->current_name, filename,
+                                              [&fileid, &status] (str ret) {
+                                                  json j = json::parse(ret);
+
+                                                  fileid = j["fileid"];
+                                                  status = j["status"];
+                                              });
+
+            if (status) {
+                SendFileUtils::send_file(filename, fileid, [] (double rate) {
+                    printf("%lf\n", rate);
+                });
+            } else {
+                printf("error in send file\n");
+            }
+        }
+
+        g_free(filename);
+    }
+
+    gtk_widget_destroy(dialog);
 }
 
 void ChatPanel::on_button_image_clicked(GtkWidget *widget, gpointer data) {
@@ -199,6 +313,11 @@ void ChatPanel::on_button_send_clicked(GtkWidget *widget, gpointer data) {
     panel->refresh_chat_body();
 }
 
+
+/*
+ * choose a friend or a group
+ *
+ */
 void ChatPanel::on_button_side_item_clicked(GtkWidget *widget, gpointer d) {
     auto data = (Data *)d;
     auto panel = data->chat_panel;
@@ -239,6 +358,11 @@ void ChatPanel::on_button_side_item_clicked(GtkWidget *widget, gpointer d) {
     panel->refresh_chat_body();
 }
 
+
+/*
+ * append chat message
+ * a text or a file button
+ */
 void ChatPanel::append_chat_item(GdkPixbuf * pix, const json & j, bool self) {
 
     if (pix == nullptr)
@@ -255,6 +379,11 @@ void ChatPanel::append_chat_item(GdkPixbuf * pix, const json & j, bool self) {
 //    gtk_widget_show_all(item);
 }
 
+
+/*
+ * create a chat item
+ * a text or a file button
+ */
 GtkWidget* ChatPanel::create_chat_item(GdkPixbuf * pix, const json & j, bool self) {
     GtkWidget * box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 
@@ -315,7 +444,11 @@ GtkWidget* ChatPanel::create_chat_item(GdkPixbuf * pix, const json & j, bool sel
 void ChatPanel::on_button_recv_file_clicked(GtkWidget *widget, gpointer user_data) {
     auto data = (ChatData *)user_data;
 
-    printf("%s\n", data->file_id.c_str());
+    auto file_id = data->file_id;
+
+    ClientUtils::send_me_a_file(file_id);
+
+//    printf("%s\n", data->file_id.c_str());
 }
 
 void ChatPanel::clear_chat_item() {
@@ -434,4 +567,8 @@ void ChatPanel::refresh_friends_list(json friends, json groups) {
 
 void ChatPanel::refresh_chat_body() {
     gtk_widget_show_all(this->chat_body_box);
+}
+
+void ChatPanel::set_parent_window(GtkWidget *window) {
+    this->parent_window = window;
 }

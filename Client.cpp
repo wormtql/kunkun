@@ -96,6 +96,9 @@ Client::Client(){}
  * Date        : 2019.8.28
  ****************************************************/
 int Client::recv_msg(char * ret) {
+
+//    g_mutex_lock(&recv_mutex);
+
     int status = (int)recv(sockfd, buf, BUFSIZE, 0);
 
     if(status == -1){
@@ -115,6 +118,8 @@ int Client::recv_msg(char * ret) {
     }
 
     strcpy(ret, buf);
+
+//    g_mutex_unlock(&recv_mutex);
 
     return 1;
 }

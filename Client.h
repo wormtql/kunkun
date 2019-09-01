@@ -25,6 +25,8 @@ private:
     static GMutex ins_mutex;
     // for send
     GMutex send_mutex;
+    // for recv
+    GMutex recv_mutex;
 
     Client();
 

@@ -114,6 +114,36 @@ public:
 
     static void request_join_group(const std::string & from, const std::string & group_id);
 
+
+    static void chat_send_file_begin(const std::string & from, const std::string & to, const std::string & filename, SocketCallback callback);
+
+
+    static void chat_send_file(const std::string & file_id, bool eof, const std::string & content);
+
+
+    static void group_send_file_begin(str from, str group_id, str filename, SocketCallback callback);
+
+
+    static void send_me_a_file(str fileid);
+
+
+    static json list_friend_request(str username);
+
+
+    static json list_group_invitation(str username);
+
+
+    static json list_group_request(str username);
+
+
+    static json send_add_friend_result(str from, str to, bool accept);
+
+
+    static json send_invite_to_group_result(str whom, str group_id, bool accept);
+
+
+    static json send_join_group_result(str who, str group_id, bool accept);
+
     // todo ...
 };
 

@@ -170,3 +170,10 @@
 #chat_panel .chat_button_file_right:hover {
     background: linear-gradient(45deg, crimson, #ff7640);
 }
+
+#chat_panel #status_bar {
+    margin: 8px 50px;
+    border-radius: 3px;
+    background: linear-gradient(45deg, crimson, #ff7640);
+    color: white;
+}

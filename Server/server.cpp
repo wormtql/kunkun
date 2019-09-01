@@ -13,7 +13,7 @@
 #include <arpa/inet.h>
 #include <gtk/gtk.h>
 #include <fcntl.h>
-#include <mysql.h>
+#include <mysql/mysql.h>
 #include "json.hpp"
 
 // #include "json.hpp"
@@ -35,7 +35,7 @@ map<string, int> username_to_fd;
 // alive socket
 vector<int> alive_socket;
 
-GMutex mutex;
+GMutex alive_socket_mutex;
 int groupnum = 0;
 
 
@@ -67,11 +67,15 @@ bool check_password( const json recv_msg )
 
     //check_password with mysql ... mzh
 
+
+    return true;
 }
 
 bool check_username_exist( const string username )
 {
     //check_username_exist with mysql ... mzh
+
+    return true;
 }
 
 bool create_group( const int group_id, const json recv_msg )
@@ -81,6 +85,8 @@ bool create_group( const int group_id, const json recv_msg )
 
     //create_group with mysql ... mzh
 
+
+    return true;
 }
 
 bool rename_group( const json recv_msg )
@@ -89,9 +95,11 @@ bool rename_group( const json recv_msg )
     string new_name = recv_msg["new_name"];
 
     //rename_group with mysql ... mzh
-
+    return true;
 }
 
+
+// 向被请求者发送请求消息
 bool send_add_friend_request( const json recv_msg )
 {
     string to_name = recv_msg["to"];
@@ -101,23 +109,30 @@ bool send_add_friend_request( const json recv_msg )
     to_msg["command"] = "recv_add_friend_request";
     to_msg["from"] = recv_msg["from"];
     to_msg["to"] = recv_msg["to"];
-    if( to_fd = username_to_fd[to_name] )
-    { // onlion operation
+//    if( to_fd = username_to_fd[to_name] )
+    if (username_to_fd.find(to_name) != username_to_fd.end())
+    { // online operation
+
+        // 如果对方在线就发给对方
+
         string s = to_msg.dump();
-        char *c = s.data();
-        int ret = send(fd, c, sizeof(c), 0);
+
+        int fd = username_to_fd[to_name];
+
+        int ret = send(fd, s.c_str(), sizeof(char) * s.size(), 0);
         if( !ret ){
             printf("send add friend request fail\n");
             return 0;
         }
     }
-    else
-    {
-        // off-line operation
-    }
+
+    // todo 数据库中的请求表更新
+
     return 1;
 }
 
+
+// 向请求者发送被请求者的 接受/不接受 信息
 bool send_add_friend_result( const json recv_msg )
 {
     string to_name = recv_msg["from"];
@@ -128,11 +143,15 @@ bool send_add_friend_result( const json recv_msg )
     to_msg["from"] = recv_msg["from"];
     to_msg["to"] = recv_msg["to"];
     to_msg["accept"] = recv_msg["accept"];
-    if( to_fd = username_to_fd[to_name] )
-    { // onlion operation
+//    if( to_fd = username_to_fd[to_name] )
+    if (username_to_fd.find(to_name) != username_to_fd.end())
+    { // online operation
         string s = to_msg.dump();
-        char *c = s.data();
-        int ret = send(fd, c, sizeof(c), 0);
+
+        int fd = username_to_fd[to_name];
+
+//        char *c = s.data();
+        int ret = send(fd, s.c_str(), sizeof(char) * s.size(), 0);
         if( !ret ){
             printf("send add friend request fail\n");
             return 0;
@@ -140,12 +159,12 @@ bool send_add_friend_result( const json recv_msg )
     }
     else
     {
-        // off-line operation
+        // todo off-line operation
     }
 
     if( recv_msg["accept"] == true )
     {
-        // update friend list with mysql ... mzh
+        // todo update friend list with mysql ... mzh
     }
 
     return 1;
@@ -160,13 +179,17 @@ bool chat_send_msg( const json recv_msg )
     to_msg["command"] = "chat_recv_msg";
     to_msg["from"] = recv_msg["from"];
     to_msg["to"] = recv_msg["to"];
+    to_msg["content"] = recv_msg["content"];
     if( to_fd = username_to_fd[to_name] )
     { // onlion operation
         string s = to_msg.dump();
-        char *c = s.data();
-        int ret = send(fd, c, sizeof(c), 0);
+
+        int fd = username_to_fd[to_name];
+
+//        char *c = s.data();
+        int ret = send(fd, s.c_str(), sizeof(char) * s.size(), 0);
         if( !ret ){
-            printf("send massage from %s to %s fail\n", recv_msg["from"].data(), to_name.data() );
+            printf("send massage from %s to %s fail\n", ((string)recv_msg["from"]).c_str(), to_name.data() );
             return 0;
         }
     }
@@ -185,7 +208,8 @@ bool group_send_msg( const json recv_msg )
     string name = recv_msg["username"];
     int group_id = recv_msg["group_id"];
 
-    // update group history with mysql ... mzh
+    // todo broadcast message to group members
+    // todo update group history with mysql ... mzh
 
     return 1;
 }
@@ -196,7 +220,7 @@ json init_return_json( const json recv_msg )
     json j;
     j["debug"] = true; // 调试时修改
     j["command"] = recv_msg["command"];
-    j["status"] = flase;
+    j["status"] = false;
     j["msg"] = "";
     return j;
 }
@@ -251,12 +275,16 @@ json init_return_json( const json recv_msg )
 void process_msg( const json recv_msg, const int fd )
 {
     json return_msg = init_return_json( recv_msg );
+
+    string cmd = recv_msg["command"];
+
+
     if( recv_msg["command"] == "login" ) // login
     {
         bool already_login = check_login( recv_msg );
         if( already_login )
         {
-            return_msg["msg"] = recv_msg["username"] + " had log in";
+            return_msg["msg"] = (string)recv_msg["username"] + " had log in";
         }
         else
         {
@@ -280,7 +308,7 @@ void process_msg( const json recv_msg, const int fd )
         bool username_exist = check_username_exist( recv_msg["username"] );
         if( username_exist )
         {
-            return_msg["msg"] = recv_msg["username"] + " has already exist";
+            return_msg["msg"] = (string)recv_msg["username"] + " has already exist";
         }
         else
         {
@@ -293,7 +321,7 @@ void process_msg( const json recv_msg, const int fd )
     }
     else if( recv_msg["command"] == "create_group" )
     {
-        bool creat_group_res = creat_group( ++groupnum, recv_msg );
+        bool creat_group_res = create_group( ++groupnum, recv_msg );
         if( creat_group_res )
         {
             return_msg["status"] = true;
@@ -321,7 +349,7 @@ void process_msg( const json recv_msg, const int fd )
         bool username_exist = check_username_exist( recv_msg["to"] );
         if( !username_exist )
         {
-            return_msg["msg"] = recv_msg["to"] + " doesnt exist";
+            return_msg["msg"] = (string)recv_msg["to"] + " doesnt exist";
         }
         else
         {
@@ -354,7 +382,7 @@ void process_msg( const json recv_msg, const int fd )
         bool username_exist = check_username_exist( recv_msg["to"] );
         if( !username_exist )
         {
-            return_msg["msg"] = recv_msg["to"] + " doesnt exist";
+            return_msg["msg"] = (string)recv_msg["to"] + " doesnt exist";
         }
         else
         {
@@ -385,11 +413,35 @@ void process_msg( const json recv_msg, const int fd )
     {
 
     }
+    else if ( cmd == "send_join_group_request" )
+    {
+
+    }
+    else if (cmd == "alter_user_info")
+    {
+
+    }
+    else if (cmd == "get_user_info")
+    {
+
+    }
+    else if (cmd == "list_user_like")
+    {
+
+    }
+    else if (cmd == "list_group_like")
+    {
+
+    }
+    else if (cmd == "chat_send_file")
+    {
+
+    }
 
     // send massage to client
     string s = return_msg.dump();
-    char *c = s.data();
-    int ret = send(fd, c, sizeof(c), 0);
+//    char *c = s.data();
+    int ret = send(fd, s.c_str(), sizeof(char) * s.size(), 0);
     if (ret == -1) {
         printf("send fail\n");
     } else {
@@ -407,7 +459,7 @@ void * thread_func(void * data) {
 
     while (1) {
         // require lock;
-        g_mutex_lock(&mutex);
+        g_mutex_lock(&alive_socket_mutex);
 
         auto iter = alive_socket.begin();
         while (iter != alive_socket.end()) {
@@ -447,7 +499,7 @@ void * thread_func(void * data) {
             iter++;
         }
 
-        g_mutex_unlock(&mutex);
+        g_mutex_unlock(&alive_socket_mutex);
     }
 }
 
@@ -493,30 +545,10 @@ int main(int argc, char * argv[]) {
             fcntl(new_socketfd, F_SETFL, flags | O_NONBLOCK);
 
             // add alive socket
-
-            // while (lock == 1);
-            g_mutex_lock(&mutex);
+            g_mutex_lock(&alive_socket_mutex);
             alive_socket.push_back(new_socketfd);
-            g_mutex_unlock(&mutex);
-            // lock = 0;
+            g_mutex_unlock(&alive_socket_mutex);
 	    }
-
-        // if (recv(new_socketfd, buf, 200, 0) == -1) {
-        //     printf("cant receive packet\n");
-        //     exit(1);
-        // }
-        // printf("received from client: %s\n", buf);
-
-        // len = strlen(buf);
-        // for (i = 0; i < len; i++) {
-        //     buf[i] = toupper(buf[i]);
-        // }
-        // if (send(new_socketfd, buf, len, 0) == -1) {
-        //     printf("cant send packet\n");
-        //     exit(1);
-        // }
-
-        // close(new_socketfd);
     }
 
     return 0;

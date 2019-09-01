@@ -28,6 +28,8 @@ private:
     };
 private:
 
+    GtkWidget * parent_window = nullptr;
+
     // box
     GtkWidget * root = nullptr;
 
@@ -44,6 +46,10 @@ private:
     // input box
     GtkWidget * input_box = nullptr;
     GtkTextBuffer * input_box_buffer = nullptr;
+
+    GtkWidget * status_bar = nullptr;
+
+    GtkWidget * button_set_2 = nullptr;
 
 
     GtkWidget * current_friend = nullptr;
@@ -92,6 +98,10 @@ public:
 
 
     void refresh_chat_body();
+
+
+
+    void set_parent_window(GtkWidget * window);
 };
 
 
