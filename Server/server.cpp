@@ -46,6 +46,23 @@ void check_logout( const int fd ){
     fd_to_username.erase( fd );
 }
 
+// 对 send 的封装
+int my_send(int fd, const std::string msg) {
+    return send(fd, msg.c_str(), sizeof(char) * msg.size(), 0);
+}
+
+// send fd a system message
+int send_sys_msg(int fd, const std::string & msg)
+{
+    json j;
+
+    j["debug"] = false;
+    j["command"] = "recv_sys_msg";
+    j["msg"] = msg;
+
+    return my_send(fd, j.dump());
+}
+
 // check user login
 bool check_login( const json recv_msg )
 {
@@ -138,11 +155,13 @@ bool send_add_friend_result( const json recv_msg )
     string to_name = recv_msg["from"];
     int to_fd;
     json to_msg;
-    to_msg["debug"] = true;
-    to_msg["command"] = "recv_add_friend_result";
-    to_msg["from"] = recv_msg["from"];
-    to_msg["to"] = recv_msg["to"];
-    to_msg["accept"] = recv_msg["accept"];
+    to_msg["debug"] = false;
+    to_msg["command"] = "recv_sys_msg";
+    // to_msg["from"] = recv_msg["from"];
+    // to_msg["to"] = recv_msg["to"];
+    // to_msg["accept"] = recv_msg["accept"];
+    string temp = recv_msg["accept"] ? "接受" : "不接受";
+    to_msg["msg"] = (string)recv_msg["to"] + temp + "了你的好友申请";
 //    if( to_fd = username_to_fd[to_name] )
     if (username_to_fd.find(to_name) != username_to_fd.end())
     { // online operation
@@ -159,6 +178,7 @@ bool send_add_friend_result( const json recv_msg )
     }
     else
     {
+        // ignore it
         // todo off-line operation
     }
 
@@ -279,7 +299,7 @@ void process_msg( const json recv_msg, const int fd )
     string cmd = recv_msg["command"];
 
 
-    if( recv_msg["command"] == "login" ) // login
+    if( cmd == "login" ) // login
     {
         bool already_login = check_login( recv_msg );
         if( already_login )
@@ -303,7 +323,7 @@ void process_msg( const json recv_msg, const int fd )
             }
         }
     }
-    else if( recv_msg["command"] == "signup" )
+    else if( cmd == "signup" )
     {
         bool username_exist = check_username_exist( recv_msg["username"] );
         if( username_exist )
@@ -319,7 +339,7 @@ void process_msg( const json recv_msg, const int fd )
             printf("%s sign up\n", username.data());
         }
     }
-    else if( recv_msg["command"] == "create_group" )
+    else if( cmd == "create_group" )
     {
         bool creat_group_res = create_group( ++groupnum, recv_msg );
         if( creat_group_res )
@@ -332,7 +352,7 @@ void process_msg( const json recv_msg, const int fd )
             return_msg["msg"] = "error with mysql";
         }
     }
-    else if( recv_msg["command"] == "rename_group" )
+    else if( cmd == "rename_group" )
     {
         bool rename_group_res = rename_group( recv_msg );
         if( rename_group_res )
@@ -344,7 +364,7 @@ void process_msg( const json recv_msg, const int fd )
             return_msg["msg"] = "error with mysql";
         }
     }
-    else if( recv_msg["command"] == "send_add_friend_request" )
+    else if( cmd == "send_add_friend_request" )
     {
         bool username_exist = check_username_exist( recv_msg["to"] );
         if( !username_exist )
@@ -365,7 +385,27 @@ void process_msg( const json recv_msg, const int fd )
             
         }
     }
-    else if( recv_msg["command"] == "send_add_friend_result" )
+    else if ( cmd == "send_join_group_request" )
+    {
+        // todo
+    }
+    else if ( cmd == "alter_user_info" )
+    {
+        // todo
+    }
+    else if ( cmd == "get_user_info" )
+    {
+
+    }
+    else if ( cmd == "list_user_like" )
+    {
+
+    }
+    else if ( cmd == "list_group_like" )
+    {
+
+    }
+    else if( cmd == "send_add_friend_result" )
     {
         bool send_add_friend_result_res = send_add_friend_result( recv_msg );
         if( send_add_friend_result_res )
@@ -377,7 +417,15 @@ void process_msg( const json recv_msg, const int fd )
             return_msg["msg"] = "send result failed";
         }
     }
-    else if( recv_msg["command"] == "chat_send_msg" )
+    else if ( cmd == "send_invite_to_group_result" )
+    {
+
+    }
+    else if ( cmd == "send_join_group_result" )
+    {
+
+    }
+    else if( cmd == "chat_send_msg" )
     {
         bool username_exist = check_username_exist( recv_msg["to"] );
         if( !username_exist )
@@ -397,7 +445,7 @@ void process_msg( const json recv_msg, const int fd )
             }
         }
     }
-    else if( recv_msg["command"] == "group_send_msg" )
+    else if( cmd == "group_send_msg" )
     {
         bool group_send_msg_res = group_send_msg( recv_msg );
         if( group_send_msg_res )
@@ -409,33 +457,53 @@ void process_msg( const json recv_msg, const int fd )
 
         }
     }
-    else if( recv_msg["command"] == "chat_send_file_begin" )
+    else if( cmd == "chat_send_file_begin" )
     {
 
+    }
+    else if ( cmd == "chat_send_file" )
+    {
+
+    }
+    else if ( cmd == "group_send_file_begin" )
+    {
+        // 没有 group_send_file，因为与 chat_send_file 完全相同
     }
     else if ( cmd == "send_join_group_request" )
     {
 
     }
-    else if (cmd == "alter_user_info")
+    else if ( cmd == "send_me_a_file" )
     {
 
     }
-    else if (cmd == "get_user_info")
+    else if ( cmd == "list_friend_request" )
     {
 
     }
-    else if (cmd == "list_user_like")
+    else if ( cmd == "list_group_invitation" )
     {
 
     }
-    else if (cmd == "list_group_like")
+    else if (cmd == "list_group_request")
     {
 
     }
-    else if (cmd == "chat_send_file")
+    else if (cmd == "get_chat_friend_history")
     {
 
+    }
+    else if (cmd == "get_chat_group_history")
+    {
+        
+    }
+    else if (cmd == "get_friends")
+    {
+        
+    }
+    else if (cmd == "get_groups")
+    {
+        
     }
 
     // send massage to client
@@ -448,7 +516,10 @@ void process_msg( const json recv_msg, const int fd )
         printf("send complete\n");
     }
     //
-
+    if (cmd == "get_chat_friend_history") {
+        printf("worm\n");
+        send_sys_msg(fd, "worm");
+    }
 }
 
 const char debug_str[100] = "{\"debug\":true}";
@@ -486,14 +557,14 @@ void * thread_func(void * data) {
                 // handle msg here
                 json j = json::parse(buf);
                 printf("recv from socket %d: %s\n", fd, buf);
-                //process_msg( j, fd );
+                process_msg( j, fd );
 
-                int ret = send(fd, debug_str, sizeof(debug_str), 0);
-                if (ret == -1) {
-                    printf("send fail\n");
-                } else {
-                    printf("send complete\n");
-                }
+                // int ret = send(fd, debug_str, sizeof(debug_str), 0);
+                // if (ret == -1) {
+                //     printf("send fail\n");
+                // } else {
+                //     printf("send complete\n");
+                // }
             }
             
             iter++;

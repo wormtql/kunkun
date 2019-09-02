@@ -225,7 +225,7 @@ send_join_group_result
 //        "accept": [true | false],
 //    }
 
-recv_system_msg
+recv_sys_msg
     server:
     {
         "command": "recv_sys_msg",
@@ -490,6 +490,48 @@ get_chat_group_history
     server
     {
         格式同上
+    }
+
+get_friends
+    client: 
+    {
+        "command": ...,
+        "who": "username",
+    }
+    server
+    {
+        "command": ...,
+        "status": ...,
+        "msg": ...,
+        "list":
+        [
+            {
+                "name": "[username]",
+                "tag": "[tag]"
+            },
+            ...
+        ]
+    }
+
+get_groups
+    client: 
+    {
+        "command": ...,
+        "who": "username",
+    }
+    server
+    {
+        "command": ...,
+        "status": ...,
+        "msg": ...,
+        "list":
+        [
+            {
+                "name": "[username]",
+                "id": "[tag]"
+            },
+            ...
+        ]
     }
 
 ...
