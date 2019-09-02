@@ -3,6 +3,7 @@
 #include <vector>
 #include <stdio.h>
 #include <string.h>
+#include <direct.h>
 #include <ctype.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -111,6 +112,7 @@ void check_logout( const int fd )
     fd_to_username.erase( fd );
     fd_to_gmutex.erase( fd );
 }
+
 
 // 在线检测
 bool check_login( const json recv_msg, string &msg )
@@ -664,7 +666,6 @@ void process_msg( const json recv_msg, const int fd )
     else if( cmd == "send_me_a_file" ) {
         recv_file(recv_msg["fileid"]);
     }
-
     // send massage to client
     string s = return_msg.dump();
     // char *c = s.data();
@@ -676,7 +677,10 @@ void process_msg( const json recv_msg, const int fd )
         printf("send complete\n");
     }
     //
-
+    if (cmd == "get_chat_friend_history") {
+        printf("worm\n");
+        send_sys_msg(fd, "worm");
+    }
 }
 
 const char debug_str[100] = "{\"debug\":true}";
