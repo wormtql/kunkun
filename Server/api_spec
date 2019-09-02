@@ -345,14 +345,14 @@ group_recv_msg
 send_file_begin
     client:
     {
-        "command": "chat_send_file_begin",
+        "command": "send_file_begin",
         "filename": "[filename]",
         //"from": "[username]",
         //"to": "[username]",
     }
     server:
     {
-        "command": "chat_send_file_begin",
+        "command": "send_file_begin",
         "status": [true | false],
         //"filename": "[filename]",
         "fileid": [fileid], // 服务器给文件分配id
@@ -382,7 +382,7 @@ chat_send_file
 group_send_file
     client:
     {
-        "command": "chat_send_file",
+        "command": "group_send_file",
         "from": "[username]",
         "group_id": [...],
         "fileid": [fileid], // 申请时服务器返回的文件id
@@ -391,7 +391,7 @@ group_send_file
     }
     server:
     {
-        "command": "chat_send_file", 
+        "command": "group_send_file", 
         "status": [true | false],
         "msg": "..."
     }
