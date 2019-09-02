@@ -579,7 +579,7 @@ get_groups
         [
             {
                 "name": "[username]",
-                "id": "[tag]"
+                "tag": "[tag]"
             },
             ...
         ]
