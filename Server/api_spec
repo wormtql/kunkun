@@ -111,7 +111,7 @@ send_invite_to_group_request
     }
     db:
     // 对方离线时操作
-    bool ( string username, int groupid, string &msg )
+    bool ( string invite_username //邀请人, string to_username //被邀请人, int groupid, string &msg )
 
 // 发送群聊申请
 send_join_group_request
