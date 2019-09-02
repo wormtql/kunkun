@@ -59,14 +59,16 @@ int mysend( SOCKET s, const char FAR *buf, int len, int flags )
     return ret;
 }
 // logout and map_erase
-void check_logout( const int fd ){
+void check_logout( const int fd )
+{
     string username = fd_to_username[fd];
     username_to_fd.erase( username );
     fd_to_username.erase( fd );
+    fd_to_gmutex.erase( fd );
 }
 
-// check user login
-bool check_login( const json recv_msg )
+// 在线检测
+bool check_login( const json recv_msg, string &msg )
 {
     //get username
     string username = recv_msg["username"];
@@ -78,45 +80,43 @@ bool check_login( const json recv_msg )
     return false;
 }
 
-bool check_password( const json recv_msg )
+// 登录
+bool check_password( const json recv_msg, string &msg )
 {
     //get username and password
     string username = recv_msg["username"];
     string user_password = recv_msg["password"];
-
-    //check_password with mysql ... mzh
-
-
-    return true;
+    bool res = _login( username, user_password, msg ); // todo mysql
+    return res;
 }
 
-bool check_username_exist( const string username )
+// 注册
+bool signup( const json recv_msg, string &msg )
 {
-    //check_username_exist with mysql ... mzh
-
-    return true;
+    username = recv_msg["username"];
+    password = recv_msg["password"];
+    bool res = _signup( username, password, msg ); // todo mysql
+    return res;
 }
 
-bool create_group( const int group_id, const json recv_msg )
+// 创建群聊
+bool create_group( const json recv_msg, int &groupid, string &msg )
 {
-    string group_name = recv_msg["group_name"];
-    string group_creater = recv_msg["who"];
-
-    //create_group with mysql ... mzh
-
-
-    return true;
+    string groupname = recv_msg["group_name"];
+    string groupcreater = recv_msg["who"];
+    bool res = _create_group( groupname, groupcreater, groupid, msg ); // todo mysql
+    return res;
 }
 
+// 重命名群聊
 bool rename_group( const json recv_msg )
 {
-    int group_id = recv_msg["group_id"];
+    int groupid = recv_msg["group_id"];
     string new_name = recv_msg["new_name"];
-
-    //rename_group with mysql ... mzh
-    return true;
+    string username = recv_msg["who"];
+    bool res = _rename_group( groupid, username, new_name, string &msg ); // todo mysql
+    return res;
 }
-
 
 // 向被请求者发送请求消息
 bool send_add_friend_request( const json recv_msg )
@@ -389,7 +389,7 @@ bool recv_file( const int fileid, const int fd )
 void process_msg( const json recv_msg, const int fd )
 {
     json return_msg = init_return_json( recv_msg );
-
+    string msg;
     string cmd = recv_msg["command"];
 
     if( cmd == "login" ) // login
@@ -401,60 +401,69 @@ void process_msg( const json recv_msg, const int fd )
         }
         else
         {
-            bool password_match = check_password( recv_msg );
+            bool password_match = check_password( recv_msg, msg );
             if( password_match )
             {
                 string username = recv_msg["username"];
+                // add online_map
                 username_to_fd[username] = fd;
                 fd_to_username[fd] = username;
+                GMutex newmutex;
+                fd_to_gmutex[fd] = newmutex;
+
                 return_msg["status"] = true;
-                printf("%s log in\n", username.data());
+                printf("%s login\n", username.data());
             }
             else
             {
-                return_msg["msg"] = "password incorrect";
+                return_msg["msg"] = msg;
             }
         }
     }
     else if( cmd == "signup" )
     {
-        bool username_exist = check_username_exist( recv_msg["username"] );
+        bool signup_res = signup( recv_msg, msg );
         if( username_exist )
         {
-            return_msg["msg"] = (string)recv_msg["username"] + " has already exist";
+            return_msg["msg"] = msg;
         }
         else
         {
             string username = recv_msg["username"];
+            // add online_map
             username_to_fd[username] = fd;
             fd_to_username[fd] = username;
+            GMutex newmutex;
+            fd_to_gmutex[fd] = newmutex;
+
             return_msg["status"] = true;
-            printf("%s sign up\n", username.data());
+            printf("%s signup and login\n", username.data());
         }
     }
     else if( cmd == "create_group" )
     {
-        bool creat_group_res = create_group( ++groupnum, recv_msg );
+    	int groupid;
+        bool creat_group_res = create_group( recv_msg, groupid, msg );
         if( creat_group_res )
         {
             return_msg["status"] = true;
-            return_msg["group_id"] = groupnum;
+            return_msg["group_id"] = groupid;
         }
         else
         {
-            return_msg["msg"] = "error with mysql";
+            return_msg["msg"] = msg;
         }
     }
     else if( cmd == "rename_group" )
     {
-        bool rename_group_res = rename_group( recv_msg );
+        bool rename_group_res = rename_group( recv_msg, msg );
         if( rename_group_res )
         {
             return_msg["status"] = true;
         }
         else
         {
-            return_msg["msg"] = "error with mysql";
+            return_msg["msg"] = msg;
         }
     }
     else if( cmd == "send_add_friend_request" )
@@ -539,12 +548,11 @@ void process_msg( const json recv_msg, const int fd )
         }
         else
         {
-
+        	return_msg[""]
         }
     }
     else if( cmd == "chat_send_file" )
     {
-
     }
     else if( cmd == "send_me_a_file" ) {
         recv_file(recv_msg["fileid"]);

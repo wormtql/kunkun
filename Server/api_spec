@@ -96,6 +96,24 @@ send_add_friend_request
     // 对方离线时操作
     bool ( string from_name, string to_name, string &msg )
 
+// 发送群聊邀请
+send_invite_to_group_request
+    recv:
+    {
+        "command": "...",
+        "from": "...",
+        "to": "...",
+        "group_id": "..."
+    }
+    return:
+    {
+        ...
+    }
+    db:
+    // 对方离线时操作
+    bool ( string username, int groupid, string &msg )
+
+// 发送群聊申请
 send_join_group_request
     recv:
     {
