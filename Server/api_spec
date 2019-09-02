@@ -143,7 +143,7 @@ alter_user_info
         "msg": ...
     }
     db:
-    bool ( string username, string filed, string new_val, string &msg )
+    bool ( string username, string field, string new_val, string &msg )
 
 get_user_info
     recv
@@ -179,7 +179,7 @@ list_user_like
         ]
     }
     db:
-    bool( string query_str, vector<string>user_list, string &msg )
+    bool( string query_str, vector<string>&user_list, string &msg )
 
 // 查找群聊名
 list_group_like
@@ -201,15 +201,6 @@ list_group_like
     }
     db:
     bool ( string query_str, vector<string>&group_list, string &msg )
-
-// 接收好友请求
-recv_add_friend_request
-    server:
-    {
-        "command": "recv_add_friend_request",
-        "from": "[username]",
-        "to": "[username]",
-    }
     
 // 发送好友请求结果 
 send_add_friend_result
@@ -552,4 +543,12 @@ get_chat_group_history
         格式同上
     }
 
+
+
+
+
+db:
+bool _find_groupname( int groupid, string &groupname, string &msg )
+bool _find_group_creater( int groupid, string &creater, string &msg )
 ...
+

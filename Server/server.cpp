@@ -49,7 +49,26 @@ vector<fp_fd> alive_file;
 //int lock = 0;
 
 GMutex alive_socket_mutex;
-
+// 创建文件夹（文件，聊天记录）
+void new_floder()
+{
+	string folderPath = "files"; 
+    if (access(folderPath.c_str(), 0) != 0 )
+    {
+        mkdir(folderPath.c_str());   // 返回 0 表示创建成功，-1 表示失败
+    }
+    folderPath = "chat";
+    if (access(folderPath.c_str(), 0) != 0 )
+    {
+        mkdir(folderPath.c_str());   // 返回 0 表示创建成功，-1 表示失败
+    }
+    folderPath = "group";
+    if (access(folderPath.c_str(), 0) != 0 )
+    {
+        mkdir(folderPath.c_str());   // 返回 0 表示创建成功，-1 表示失败
+    }
+}
+// 加锁 send
 int mysend( SOCKET s, const char FAR *buf, int len, int flags )
 {
     GMutex socket_mutex = fd_to_mutex(s);
@@ -57,6 +76,32 @@ int mysend( SOCKET s, const char FAR *buf, int len, int flags )
     int ret = send( s, buf, len, flags );
     g_mutex_unlock(&socket_mutex);
     return ret;
+}
+
+// 系统发送信息
+bool system_send( const string username, const string msg )
+{
+	json to_msg;
+	to_msg["debug"] = true;
+	to_msg["command"] = "recv_sys_msg";
+	to_msg["msg"] = msg;
+	if ( username_to_fd.find(to_name) != username_to_fd.end() )
+    {
+        // 如果对方在线就发给对方
+        string s = to_msg.dump();
+        int fd = username_to_fd[to_name];
+        int ret = mysend(fd, s.c_str(), s.size(), 0);
+        // int ret = mysend(fd, s.c_str(), sizeof(char) * s.size(), 0);
+        if( !ret ){
+            printf("send system massage fail\n");
+            return false;
+        }
+        return true;
+    }
+    else
+    {
+    	return false;
+    }
 }
 // logout and map_erase
 void check_logout( const int fd )
@@ -105,6 +150,12 @@ bool create_group( const json recv_msg, int &groupid, string &msg )
     string groupname = recv_msg["group_name"];
     string groupcreater = recv_msg["who"];
     bool res = _create_group( groupname, groupcreater, groupid, msg ); // todo mysql
+    if( res )
+    {
+    	path = "group/"+to_string( groupid );
+    	FILE *fp = fopen( path.c_str(), "wb");
+    	fclose( fp );
+    }
     return res;
 }
 
@@ -118,168 +169,149 @@ bool rename_group( const json recv_msg )
     return res;
 }
 
-// 向被请求者发送请求消息
-bool send_add_friend_request( const json recv_msg )
+// 发送好友请求
+bool send_add_friend_request( const json recv_msg, string &msg )
 {
     string to_name = recv_msg["to"];
     string from_name = recv_msg["from"];
-    json to_msg;
-    to_msg["debug"] = true;
-    to_msg["command"] = "recv_system_msg";
-    to_msg["msg"] = "You get a request of adding friend from " + from_name;
-    if (username_to_fd.find(to_name) != username_to_fd.end())
-    { // online operation
-
-        // 如果对方在线就发给对方
-
-        string s = to_msg.dump();
-        char *c = s.data();
-        int ret = send(fd, c, strlen(c), 0);
-
-        int fd = username_to_fd[to_name];
-
-        int ret = send(fd, s.c_str(), sizeof(char) * s.size(), 0);
-        if( !ret ){
-            printf("send system massage fail\n");
-            return 0;
-        }
-    }
-
-    // todo 数据库中的请求表更新
-
-    return 1;
+    system_send( to_name, "You get a request of adding friend from " + from_name );
+	// 数据库备案
+	bool res = _send_add_friend_request( from_name, to_name, msg );
+	return res;
 }
 
-bool send_join_group_request( const json recv_msg )
+// 发送群聊邀请
+bool send_invite_to_group_request( const json recv_msg, string &msg )
 {
-    string username = recv_msg["from"];
+    string from_name = recv_msg["from"];
+    string to_name = recv_msg["to"];
     int groupid = recv_msg["group_id"];
-    string groupname = find_groupname( groupid ); // with mysql ... mzh
-    string to_name = find_groupcreater( groupid ); // with mysql ... mzh
-    json to_msg;
-    to_msg["debug"] = true;
-    to_msg["command"] = "recv_system_msg";
+    string groupname;
+    bool res = _find_groupname( groupid, groupname, msg );
+    if( !res ) return false;
+    system_send( to_name, "You get a invitation of jioning group " + groupname + " from " + from_name );
+    // 数据库备案
+    bool res = _send_invite_to_group_request( from_name, to_name, groupid, msg );
+    return res;
+}
 
-    to_msg["msg"] = "You get a request of jioning group " + groupname + " from " + username;
-    if (username_to_fd.find(to_name) != username_to_fd.end())
-    { // online operation
+// 发送群聊申请
+bool send_join_group_request( const json recv_msg, string &msg )
+{
+    string from_name = recv_msg["from"];
+    int groupid = recv_msg["group_id"];
+    string groupname, creater;
+    bool res = _find_groupname( groupid, groupname, msg );
+    if( !res ) return false;
+    res = _find_group_creater( groupid, creater, msg );
+    if( !res ) return false;
+    system_send( creater, "You get a request of jioning group " + groupname + " from " + from_name );
+	// 数据库备案
+	bool res = _send_invite_to_group_request( from_name, to_name, groupid, msg );
+	return res;
+}
 
-        // 如果对方在线就发给对方
+// 修改用户信息
+bool alter_user_info( const json recv_msg, string &msg )
+{
+	string username = recv_msg["who"];
+	string field = recv_msg["field"];
+	string new_val = recv_msg["new_val"];
+    bool res = _alter_user_info( username, filed, new_val, msg );
+    return res;
+}
 
-        string s = to_msg.dump();
-        char *c = s.data();
-        int ret = send(fd, c, strlen(c), 0);
+// 查看用户信息
+bool get_user_info( const json recv_msg, string &val, string &msg )
+{
+	string username = recv_msg["who"];
+	string field = recv_msg["field"];
+    bool res = _get_user_info( username, field, val, msg );
+    return res;
+}
 
-        int fd = username_to_fd[to_name];
+// 查找用户
+bool list_user_like( const json recv_msg, vector<string>&list, string &msg )
+{
+    string query_str = recv_msg["query_str"];
+    bool res = _list_user_like( query_str, list, msg );
+    return res;
+}
 
-        int ret = send(fd, s.c_str(), sizeof(char) * s.size(), 0);
-        if( !ret ){
-            printf("send system massage fail\n");
-            return 0;
-        }
-    }
-
-    // todo 数据库中的请求表更新
-
-    return 1;
+// 查找群聊
+bool list_group_like( const json recv_msg, vector<string>&list, string &msg )
+{
+    string query_str = recv_msg["query_str"];
+    bool res = _list_group_like( query_str, list, msg );
+    return res;
 }
 
 // 向请求者发送被请求者的 接受/不接受 信息
-bool send_add_friend_result( const json recv_msg )
+bool send_add_friend_result( const json recv_msg, string &msg )
 {
     string to_name = recv_msg["from"];
     string from_name = recv_msg["to"];
-    bool accept = recv_msg["accept"];
-    json to_msg;
-    to_msg["debug"] = true;
-    to_msg["command"] = "recv_system_msg";
-    if( accept ) to_msg["msg"] = from_name + " accept your friend request";
-    else to_msg["msg"] = from_name + " refuse your friend request";
-
-    if (username_to_fd.find(to_name) != username_to_fd.end())
-    { // online operation
-        string s = to_msg.dump();
-        char *c = s.data();
-        int ret = send(fd, c, strlen(c), 0);
-        int fd = username_to_fd[to_name];
-
-        int ret = send(fd, s.c_str(), sizeof(char) * s.size(), 0);
-        if( !ret ){
-            printf("send system massage fail\n");
-            return 0;
-        }
+    bool accept = recv_msg["accept"]; 
+    if( accept )
+    {
+    	system_send( to_name, from_name + " accept your friend request");
+    	bool res = _send_add_friend_result( to_name, from_name, msg );
+    	if( res )
+    	{
+    		// 创建聊天记录文件夹
+	    	string path = "chat/"+to_name+"_"+from_name;
+	    	FILE *fp = fopen( path.c_str(), "wb" );
+	    	fclose( fp );
+    	}
+    	return res;
     }
     else
     {
-        // todo off-line operation
+    	system_send( to_name, from_name + " refuse your friend request");
     }
-
-    if( recv_msg["accept"] == true )
-    {
-        // todo update friend list with mysql ... mzh
-    }
-
-    return 1;
+    return true;
 }
 
-bool send_join_group_result( const json recv_msg )
+// 发送群聊邀请结果
+bool send_invite_to_group_result( const json recv_msg, string &msg )
+{
+    string to_name = recv_msg["whom"];
+    int groupid = recv_msg["group_id"];
+    string groupname;
+    bool res = _find_groupname( groupid, groupname, msg );
+    if( !res ) return false; 
+    bool accept = recv_msg["accept"];
+    if( accept )
+    {
+    	bool res = _send_invite_to_group_result( to_name, groupid, msg );
+    	return res;
+    }
+    return true;
+}
+
+// 发送群聊申请结果
+bool send_join_group_result( const json recv_msg, string &msg )
 {
     string to_name = recv_msg["who"];
-    string groupname = find_groupname( groupid ); // with mysql ... mzh
+    int groupid = recv_msg["group_id"];
+    string groupname;
+    bool res = _find_groupname( groupid, groupname, msg );
+    if( !res ) return false; 
     bool accept = recv_msg["accept"];
-    json to_msg;
-    to_msg["debug"] = true;
-    to_msg["command"] = "recv_system_msg";
-    if( accept ) to_msg["msg"] = groupname + " accept your join_group request";
-    else to_msg["msg"] = groupname + " refuse your join_group request";
-
-    if (username_to_fd.find(to_name) != username_to_fd.end())
-    { // online operation
-        string s = to_msg.dump();
-        char *c = s.data();
-        int ret = send(fd, c, strlen(c), 0);
-        int fd = username_to_fd[to_name];
-
-        int ret = send(fd, s.c_str(), sizeof(char) * s.size(), 0);
-        if( !ret ){
-            printf("send system massage fail\n");
-            return 0;
-        }
+    if( accept )
+    {
+    	system_send( to_name, "group " + groupname + " accept your join_group request");
+    	bool res = _send_invite_to_group_result( to_name, groupid, msg );
+    	return res;
     }
     else
     {
-        // todo off-line operation
+    	system_send( to_name, "group " + groupname + " refuse your join_group request");
     }
-
-    if( recv_msg["accept"] == true )
-    {
-        // todo update friend list with mysql ... mzh
-    }
-
-    return 1;
+    return true;
 }
 
-bool alter_user_info( const json recv_msg )
-{
-    // todo with mysql ... mzh
-}
-
-bool get_user_info( const json recv_msg )
-{
-    // todo with mysql ... mzh
-}
-
-bool list_user_like( const json recv_msg )
-{
-    // todo with mysql ... mzh
-}
-
-bool list_group_like( const json recv_msg )
-{
-    // todo with mysql ... mzh
-}
-
-bool chat_send_msg( const json recv_msg )
+bool chat_send_msg( const json recv_msg, string &msg )
 {
     string to_name = recv_msg["to"];
     json to_msg;
@@ -292,18 +324,14 @@ bool chat_send_msg( const json recv_msg )
     to_msg["to"] = recv_msg["to"];
     to_msg["content"] = text;
     if( username_to_fd.find(to_name) != username_to_fd.end() )
-    { // onlion operation
+    {
+    	// 如果对方在线
         string s = to_msg.dump();
-        char *c = s.data();
-        int ret = send(fd, c, strlen(c), 0);
-
         int fd = username_to_fd[to_name];
-
-        int ret = send(fd, s.c_str(), sizeof(char) * s.size(), 0);
-
+        int ret = send(fd, s.c_str(), s.size(), 0);
         if( !ret ){
             printf("send massage from %s to %s fail\n", ((string)recv_msg["from"]).c_str(), to_name.data() );
-            return 0;
+            return false;
         }
     }
     else
@@ -468,63 +496,142 @@ void process_msg( const json recv_msg, const int fd )
     }
     else if( cmd == "send_add_friend_request" )
     {
-        bool username_exist = check_username_exist( recv_msg["to"] );
-        if( !username_exist )
+        bool send_add_friend_request_res = send_add_friend_request( recv_msg, msg );
+        if( send_add_friend_request_res )
         {
-            return_msg["msg"] = (string)recv_msg["to"] + " doesnt exist";
+            return_msg["status"] = true;
         }
         else
         {
-            bool send_add_friend_request_res = send_add_friend_request( recv_msg );
-            if( send_add_friend_request_res )
-            {
-                return_msg["status"] = true;
-            }
-            else
-            {
-                return_msg["msg"] = "send request failed";
-            }
-            
+            return_msg["msg"] = "send request failed";
+        }
+    }
+    else if( cmd == "send_invite_to_group_request")
+    {
+    	bool send_invite_to_group_res = send_invite_to_group_request( recv_msg, msg );
+        if( send_invite_to_group_res )
+        {
+            return_msg["status"] = true;
+        }
+        else
+        {
+            return_msg["msg"] = msg;
         }
     }
     else if( cmd == "send_join_group_request" )
     {
-        bool username_exist = check_username_exist( recv_msg["to"] );
-        if( !username_exist )
+        bool send_join_group_res = send_join_group_request( recv_msg, msg );
+        if( send_join_group_res )
         {
-            return_msg["msg"] = (string)recv_msg["to"] + " doesnt exist";
+            return_msg["status"] = true;
         }
         else
         {
-            bool send_join_group_res = send_join_group_request( recv_msg );
-            if( send_add_friend_request_res )
-            {
-                return_msg["status"] = true;
-            }
-            else
-            {
-                return_msg["msg"] = "send request failed";
-            }
+            return_msg["msg"] = msg;
         }
+    }
+    else if( cmd == "alter_user_info" )
+    {
+    	bool alter_user_info_res = alter_user_info( recv_msg, msg );
+    	if( alter_user_info_res )
+    	{
+    		return_msg["status"] = true;
+    	}
+    	else
+    	{
+    		return_msg["msg"] = msg;
+    	}
+    }
+    else if( cmd == "get_user_info" )
+    {
+    	string val;
+    	bool get_user_info_res = get_user_info( recv_msg, val, msg );
+    	if( get_user_info_res )
+    	{
+    		return_msg["status"] = true;
+    		return_msg["val"] = val;
+    	}
+    	else
+    	{
+    		return_msg["msg"] = msg;
+    	}
+    }
+    else if( cmd == "list_user_like" )
+    {
+    	vector<string>list;
+    	bool list_user_like_res = list_user_like( recv_msg, list, msg );
+    	if( list_user_like_res )
+    	{
+    		json j(list);
+    		return_msg["status"] = true;
+    		return_msg["list"] = j;
+    	}
+    	else
+    	{
+    		return_msg["msg"] = msg;
+    	}
+    }
+    else if( cmd == "list_group_like" )
+    {
+    	vector<string>list;
+    	bool list_group_like_res = list_group_like( recv_msg, list, msg );
+    	if( list_group_like_res )
+    	{
+    		json j(list);
+    		return_msg["status"] = true;
+    		return_msg["list"] = j;
+    	}
+    	else
+    	{
+    		return_msg["msg"] = msg;
+    	}
+    }
+    else if( cmd == "send_add_friend_result" )
+    {
+    	bool send_add_friend_result_res = send_add_friend_result( recv_msg, msg );
+    	if( send_add_friend_result_res )
+    	{
+    		return_msg["status"] = true;
+    	}
+    	else
+    	{
+    		return_msg["msg"] = msg;
+    	}
+    }
+    else if( cmd == "send_invite_to_group_result" )
+    {
+    	bool send_invite_to_group_result_res = send_invite_to_group_result( recv_msg, msg );
+    	if( send_invite_to_group_result_res )
+    	{
+    		return_msg["status"] = true;
+    	}
+    	else
+    	{
+    		return_msg["msg"] = msg;
+    	}
+    }
+    else if( cmd == "send_join_group_result" )
+    {
+    	bool send_join_group_result_res = send_join_group_result( recv_msg, msg );
+    	if( send_join_group_result_res )
+    	{
+    		return_msg["status"] = true;
+    	}
+    	else
+    	{
+    		return_msg["msg"] = msg;
+    	}
     }
     else if( cmd == "chat_send_msg" )
     {
-        bool username_exist = check_username_exist( recv_msg["to"] );
-        if( !username_exist )
+        bool chat_send_msg_res = chat_send_msg( recv_msg );
+        if( chat_send_msg_res )
         {
-            return_msg["msg"] = (string)recv_msg["to"] + " doesnt exist";
+            return_msg["status"] = true;
         }
         else
         {
-            bool chat_send_msg_res = chat_send_msg( recv_msg );
-            if( chat_send_msg_res )
-            {
-                return_msg["status"] = true;
-            }
-            else
-            {
 
-            }
         }
     }
     else if( cmd == "group_send_msg" )
@@ -557,33 +664,12 @@ void process_msg( const json recv_msg, const int fd )
     else if( cmd == "send_me_a_file" ) {
         recv_file(recv_msg["fileid"]);
     }
-    else if ( cmd == "send_join_group_request" )
-    {
-
-    }
-    else if (cmd == "alter_user_info")
-    {
-
-    }
-    else if (cmd == "get_user_info")
-    {
-
-    }
-    else if (cmd == "list_user_like")
-    {
-
-    }
-    else if (cmd == "list_group_like")
-    {
-
-    }
-
 
     // send massage to client
     string s = return_msg.dump();
-    char *c = s.data();
-    int ret = send(fd, c, strlen(c), 0);
-    int ret = send(fd, s.c_str(), sizeof(char) * s.size(), 0);
+    // char *c = s.data();
+    // int ret = send(fd, c, strlen(c), 0);
+    int ret = mysend(fd, s.c_str(), s.size(), 0);
     if (ret == -1) {
         printf("send fail\n");
     } else {
@@ -691,6 +777,7 @@ void * thread_func(void * data) {
 
 
 int main(int argc, char * argv[]) {
+	new_floder();
     int socketfd, new_socketfd;
     sockaddr_in sin_addr, pin_addr;
     unsigned int len, pin_addr_size, i;
