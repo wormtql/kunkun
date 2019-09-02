@@ -359,7 +359,7 @@ chat_send_file_begin
         "msg": "..."
     }
     db:
-    bool ( string filename, int &fileid, string &msg )
+    bool ( string filename, int &fileid, string &path, string &msg )
 
 // 聊天发送文件
 chat_send_file
