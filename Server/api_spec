@@ -18,6 +18,8 @@ login:
         // 错误信息
         "msg": "..."
     }
+    database:
+    bool ( string name, string password, string &msg )
 
 // 注册
 signup:
@@ -35,6 +37,8 @@ signup:
         // 检测是否已经被注册等等
         "msg": "..."
     }
+    database:
+    bool ( string name, string password, string &msg )
 
 // 创建群聊
 create_group:
@@ -52,6 +56,8 @@ create_group:
         "group_id": [group_id], // 服务器分配群聊ID
         "msg": "..."
     }
+    database:
+    bool ( string groupname, string creater, int &groupid, string &msg )
 
 // 重命名群聊
 rename_group:
@@ -69,6 +75,8 @@ rename_group:
         "status": [true | false],
         "msg": "..."
     }
+    db:
+    bool ( int groupid, string username, string new_groupname, string &msg )
 
 // 发送好友请求
 send_add_friend_request
@@ -84,6 +92,9 @@ send_add_friend_request
         "status": [true | false],
         "msg": "..."
     }
+    db:
+    // 对方离线时操作
+    bool ( string from_name, string to_name, string &msg )
 
 send_join_group_request
     recv:
@@ -96,6 +107,9 @@ send_join_group_request
     {
         ...
     }
+    db:
+    // 对方离线时操作
+    bool ( string username, int groupid, string &msg )
 
 alter_user_info
     recv:
@@ -110,6 +124,8 @@ alter_user_info
         "status": ...,
         "msg": ...
     }
+    db:
+    bool ( string username, string filed, string new_val, string &msg )
 
 get_user_info
     recv
@@ -123,7 +139,10 @@ get_user_info
         "command": ...,
         "val": ...
     }
+    db:
+    bool ( string username, string field, string &val, string &msg ) 
 
+// 查找用户名
 list_user_like
     recv:
     {
@@ -141,7 +160,10 @@ list_user_like
             ...
         ]
     }
+    db:
+    bool( string query_str, vector<string>user_list, string &msg )
 
+// 查找群聊名
 list_group_like
     recv:
     {
@@ -159,6 +181,8 @@ list_group_like
             ...
         ]
     }
+    db:
+    bool ( string query_str, vector<string>&group_list, string &msg )
 
 // 接收好友请求
 recv_add_friend_request
@@ -184,6 +208,9 @@ send_add_friend_result
         "status": [true | false],
         "msg": "..."
     }
+    // if accept->true
+    db:
+    bool ( string username1, string username2, string &msg )
 
 // 发送邀请加群结果
 send_invite_to_group_result
@@ -200,6 +227,10 @@ send_invite_to_group_result
     {
         ...
     }
+    // if->accept_true
+    db:
+    bool( int groupid, string username, string &msg )
+    
 
 send_join_group_result
     client:
@@ -214,6 +245,9 @@ send_join_group_result
     {
         ...
     }
+    // if->accept_true // 与send_invite_to_group_result同一函数
+    db:
+    bool( int groupid, string username, string &msg )
 
 // 接收好友请求结果
 // recv_add_friend_result
@@ -315,6 +349,8 @@ chat_send_file_begin
         "fileid": [fileid], // 服务器给文件分配id
         "msg": "..."
     }
+    db:
+    bool ( string filename, int &fileid, string &msg )
 
 // 聊天发送文件
 chat_send_file
@@ -396,6 +432,8 @@ list_friend_request
             ...
         ]
     }
+    db:
+    bool ( string username, vector<string>&list, string &msg )
 
 // 某人收到的邀请进群请求
 list_group_invitation
@@ -424,6 +462,8 @@ list_group_invitation
             ...
         ]
     }
+    db:
+    bool ( string username, vector<struct>&list, string &msg )
 
 
 // 群主收到的加群请求
@@ -449,6 +489,8 @@ list_group_request
             ...
         ]
     }
+    db:
+    bool ( string username, vector<struct>&list, string &msg )
 
 get_chat_friend_history
     client:
