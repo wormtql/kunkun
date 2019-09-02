@@ -316,6 +316,7 @@ bool send_join_group_result( const json recv_msg, string &msg )
     return true;
 }
 
+// 聊天信息发送
 bool chat_send_msg( const json recv_msg, string &msg )
 {
     string to_name = recv_msg["to"];
@@ -346,7 +347,7 @@ bool chat_send_msg( const json recv_msg, string &msg )
     	// 如果对方在线
         string s = to_msg.dump();
         int fd = username_to_fd[to_name];
-        int ret = send(fd, s.c_str(), s.size(), 0);
+        int ret = mysend(fd, s.c_str(), s.size(), 0);
         if( !ret ){
             printf("send massage from %s to %s fail\n", from_name.c_str(), to_name.data() );
             return false;
@@ -373,12 +374,13 @@ bool chat_send_msg( const json recv_msg, string &msg )
     }
 }
 
+// 群聊信息发送
 bool group_send_msg( const json recv_msg )
 {
     string username = recv_msg["from"];
     int groupid = recv_msg["group_id"];
     vector<string>group_members;
-    bool res = get_group_members( group_id, group_members, msg );
+    get_group_members( group_id, group_members, msg );
     json to_msg;
     json text;
     text["type"] = "text";
@@ -411,7 +413,7 @@ bool group_send_msg( const json recv_msg )
             // 如果对方在线
 	        string s = to_msg.dump();
 	        int fd = username_to_fd[to_name];
-	        int ret = send(fd, s.c_str(), s.size(), 0);
+	        int ret = mysend(fd, s.c_str(), s.size(), 0);
 	        if( !ret ){
 	            printf("send massage from group %d to %s fail\n", groupid, to_name.data() );
 	        }
@@ -427,13 +429,346 @@ bool group_send_msg( const json recv_msg )
     return true;
 }
 
-bool list_friend_request( const json recv_msg, json &return_msg )
+// 开始传输文件，新建文件
+bool send_file_begin( const json recv_msg, int &fileid, string &msg )
+{
+	string filename = recv_msg["filename"];
+	string path;
+	bool res = _send_file_begin( filename, fileid, path, msg );
+	if( !res )
+	{
+		printf("file %s add to database failed\n", filename.c_str() );
+		return false;
+	}
+	FILE *fp = fopen( path.c_str(), "wb" );
+	if( fp == NULL )
+	{
+		msg = "create file failed";
+		printf("create file %s failed\n", filename.c_str() );
+		return false;
+	}
+	fclose( fp );
+}
+
+// 聊天传输文件
+bool chat_send_file( const json recv_msg, string &msg )
+{
+	int fileid = recv_msg["fileid"];
+	bool eof = recv_msg["eof"];
+	string path;
+	bool res = _find_file_path( fileid, path, msg );
+	if( !res )
+	{
+		printf("send file %d failed\n", fileid );
+		return false;
+	}
+	if( !eof ){
+		ofstream out( path, ios::app | ios::binary );
+		if( out.is_open()!=true )
+		{
+			msg = "open file failed";
+			printf("open file %d failed\n", fileid );
+			return false;
+		}
+		out << recv_msg["content"].c_str();
+		out.close();
+		return true;
+	}
+	else
+	{
+		// 文件接收完成
+		string from_name = recv_msg["from"];
+		string to_name = recv_msg["to"];
+		json to_msg;
+		json file;
+		file["type"] = "file";
+		file["file_id"] = fileid;
+		string filename;
+		bool res = _find_file_name( fileid, filename, msg );
+		if( !res )
+		{
+			printf("find file %d name failed\n", fileid );
+			return false;
+		}
+		file["file_name"] = filename;
+		to_msg["debug"] = true;
+		to_msg["command"] = "chat_recv_msg";
+		to_msg["from"] = from_name;
+		to_msg["to"] = to_name;
+		to_msg["content"] = file;
+		json history;
+		history["name"] = from_name;
+		history["type"] = "file"; 
+		history["file_id"] = fileid;
+		history["file_name"] = filename;
+		history["read"] = false;
+		string path;
+		res = _find_chat_path( to_name, from_name, path, msg );
+		if( !res )
+		{
+			printf("find chat path of %s and %s failed\n", from_name.c_str(), to_name.data() );
+			return false;
+		}
+		if( username_to_fd.find(to_name) != username_to_fd.end() )
+		{
+			// 如果对方在线
+		    string s = to_msg.dump();
+		    int fd = username_to_fd[to_name];
+		    int ret = mysend(fd, s.c_str(), s.size(), 0);
+		    if( !ret ){
+		        printf("send massage from %s to %s fail\n", from_name.c_str(), to_name.data() );
+		        return false;
+		    }
+		    history["read"] = true;
+		    ofstream out;
+		    out.open( path, ios::app );
+		    out << history.dump() << endl;
+		    out.close();
+		    return true;
+		}
+		else
+		{
+		    // 如果对方离线
+		    // 更新历史记录，记录未读
+		    ofstream out;
+		    out.open( path, ios::app );
+		    out << history.dump() << endl;
+		    out.close();
+
+		    // 数据库记录未读信息
+		    bool res = _update_unread( from_name, to_name, msg );
+		    return res;
+		}
+	}
+}
+
+// 群聊传输文件
+bool group_send_file( const json recv_msg, string &msg )
+{
+	int fileid = recv_msg["fileid"];
+	bool eof = recv_msg["eof"];
+	string path;
+	bool res = _find_file_path( fileid, path, msg );
+	if( !res )
+	{
+		printf("send file %d failed\n", fileid );
+		return false;
+	}
+	if( !eof ){
+		ofstream out( path, ios::app | ios::binary );
+		if( out.is_open()!=true )
+		{
+			msg = "open file failed";
+			printf("open file %d failed\n", fileid );
+			return false;
+		}
+		out << recv_msg["content"].c_str();
+		out.close();
+		return true;
+	}
+	else
+	{
+		// 文件接收完成
+		string username = recv_msg["from"];
+	    int groupid = recv_msg["group_id"];
+	    vector<string>group_members;
+	    get_group_members( group_id, group_members, msg );
+	    json to_msg;
+	    json file;
+	    file["type"] = "text";
+	    file["file_id"] = fileid;
+	    bool res = _find_file_name( fileid, filename, msg );
+		if( !res )
+		{
+			printf("find file %d name failed\n", fileid );
+			return false;
+		}
+		file["file_name"] = filename;
+	    to_msg["debug"] = true;
+	    to_msg["command"] = "group_recv_msg";
+	    to_msg["from"] = username;
+	    to_msg["content"] = text;
+	    json history;
+	    history["name"] = username;
+	    history["type"] = "file"; 
+		history["file_id"] = fileid;
+		history["file_name"] = filename;
+	    string path;
+	    bool res = _find_group_path( groupid, path, msg );
+	    if( !res )
+	    {
+	    	printf("find group %d path failed\n", groupid );
+	    	return false;
+	    }
+	    auto iter = group_member.begin();
+	    while( iter != group_member.end() )
+	    {
+	        to_name = *iter;
+	        if( to_name == username ){
+	        	iter++;
+	        	continue;
+	        }
+	        if( username_to_fd.find(to_name) != username_to_fd.end() )
+	        {
+	            // 如果对方在线
+		        string s = to_msg.dump();
+		        int fd = username_to_fd[to_name];
+		        int ret = mysend(fd, s.c_str(), s.size(), 0);
+		        if( !ret ){
+		            printf("send massage from group %d to %s fail\n", groupid, to_name.data() );
+		        }
+	        }
+	        iter++;
+	    }
+
+	    // 写入群聊聊天记录
+	    ofstream out;
+	    out.open( path, ios::app );
+	    out << history.dump() << endl;
+	    out.close();
+	    return true;
+	}
+}
+
+// 请求好友申请列表
+bool list_friend_request( const json recv_msg, json &return_msg, string &msg )
 {
     string username = recv_msg["username"];
-    vector<string>list = // ... with mysql 
+    vector<string>list;
+    bool res = _list_friend_request( username, list, msg );
+    if( !res ){
+    	printf("get friend_request list fail\n");
+    	return false;
+    }
     json j(list);
     return_msg["list"] = j;
-    return 1;
+    return true;
+}
+
+// 请求群聊邀请列表
+bool list_group_invitation( const json recv_msg, json &return_msg, string &msg )
+{
+	string username = recv_msg["username"];
+    vector<json>list;
+    bool res = _list_group_invitation( username, list, msg );
+    if( !res ){
+    	printf("get group_invitation list fail\n");
+    	return false;
+    }
+    json j(list);
+    return_msg["list"] = j;
+    return true;
+}
+
+// 请求群聊申请列表
+bool list_group_request( const json recv_msg, json &return_msg, string &msg )
+{
+	string username = recv_msg["username"];
+    vector<json>list;
+    bool res = _list_group_request( username, list, msg );
+    if( !res ){
+    	printf("get group_request list fail\n");
+    	return false;
+    }
+    json j(list);
+    return_msg["list"] = j;
+    return true;
+}
+
+// 获取聊天记录
+bool get_chat_friend_history( const json recv_msg, json &return_msg, string &msg )
+{
+	string from_name = recv_msg["from"];
+	string to_name = recv_msg["user"];
+	string path;
+	bool res = _find_chat_path( from_name, to_name, path, msg );
+	if( !res )
+	{
+		printf("get chat_history path failed\n");
+		return false;
+	}
+	vector<json>list;
+	json j;
+	string text;
+	ifstream in;
+	in.open( path, ios::in );
+	if( in.is_open() != true )
+	{
+		msg = "open " + path + " failed";
+		printf("open %s failed\n", path.c_str() );
+		return false;
+	}
+	while( getline(in,text) ){
+		j = json::parse( text );
+		j.erase("read");
+		list.push_back(j);
+	}
+	json jj(list);
+	return_msg["list"] = jj;
+	in.close();
+	return true;
+}
+
+// 获取群聊记录
+bool get_chat_group_history( const json recv_msg, json &return_msg, string &msg )
+{
+	int groupid = rec_msg["group_id"];
+	string path;
+	bool res = _find_group_path( groupid, path, msg );
+	if( !res )
+	{
+		printf("get group_history path failed\n");
+		return false;
+	}
+	vector<json>list;
+	json j;
+	string text;
+	ifstream in;
+	in.open( path, ios::in );
+	if( in.is_open() != true )
+	{
+		msg = "open " + path + " failed";
+		printf("open %s failed\n", path.c_str() );
+		return false;
+	}
+	while( getline(in,text) ){
+		j = json::parse( text );
+		list.push_back(j);
+	}
+	json jj(list);
+	return_msg["list"] = jj;
+	in.close();
+	return true;
+}
+
+// 获取好友列表
+bool get_friends( const json recv_msg, json &return_msg, string &msg )
+{
+	string username = recv_msg["username"];
+    vector<json>list;
+    bool res = _get_friends( username, list, msg );
+    if( !res ){
+    	printf("get friend list fail\n");
+    	return false;
+    }
+    json j(list);
+    return_msg["list"] = j;
+    return true;
+}
+
+// 获取群聊列表
+bool get_groups( const json recv_msg, json &return_msg, string &msg )
+{
+	string username = recv_msg["username"];
+    vector<json>list;
+    bool res = _get_groups( username, list, msg );
+    if( !res ){
+    	printf("get group list fail\n");
+    	return false;
+    }
+    json j(list);
+    return_msg["list"] = j;
+    return true;
 }
 
 json init_return_json( const json recv_msg )
@@ -554,7 +889,7 @@ void process_msg( const json recv_msg, const int fd )
             return_msg["msg"] = "send request failed";
         }
     }
-    else if( cmd == "send_invite_to_group_request")
+    else if( cmd == "send_invite_to_group_request" )
     {
     	bool send_invite_to_group_res = send_invite_to_group_request( recv_msg, msg );
         if( send_invite_to_group_res )
@@ -694,33 +1029,131 @@ void process_msg( const json recv_msg, const int fd )
         	return_msg["msg"] = msg;
         }
     }
-    else if( cmd == "chat_send_file_begin" )
+    else if( cmd == "send_file_begin" )
     {
-        // bool file_create_res = file_create( recv_msg["filename"] );
-        // if( !file_create_res )
-        // {
-        //     return_msg["msg"] = "fail to send file, try it later";
-        // }
-        // else
-        // {
-        // 	return_msg[""]
-        // }
+    	int fileid;
+        bool chat_send_file_begin_res = chat_send_file_begin( recv_msg, fileid, msg );
+        if( chat_send_file_begin_res )
+        {
+        	return_msg["fileid"] = fileid;
+        	return_msg["status"] = true;
+        }
+        else
+        {
+        	return_msg["msg"] = msg;
+        }
     }
     else if( cmd == "chat_send_file" )
     {
-    }
-    else if( cmd == "group_send_file_begin" )
-    {    	
+    	bool chat_send_file_res = chat_send_file( recv_msg, msg );
+    	if( chat_send_file_res )
+    	{
+    		return_msg["status"] = true;
+    	}
+    	else
+    	{
+    		return_msg["msg"] = msg;
+    	}
     }
     else if( cmd == "group_send_file" )
     {
+    	bool group_send_file_res = group_send_file( recv_msg, msg );
+    	if( group_send_file_res )
+    	{
+    		return_msg["status"] = true;
+    	}
+    	else
+    	{
+    		return_msg["msg"] = msg;
+    	}
     }
-    else if( cmd == "send_me_a_file" )
+    else if( cmd == "send_me_a_file" ) // todo
     {
-        recv_file(recv_msg["fileid"]);
+        // recv_file(recv_msg["fileid"]);
     }
-    else if( cmd == "list_friend_request")
+    else if( cmd == "list_friend_request" )
     {
+    	bool list_friend_request_res = list_friend_request( recv_msg, return_msg, msg );
+    	if( list_friend_request_res )
+    	{
+    		return_msg["status"] = true;
+    	}
+    	else
+    	{
+    		return_msg["msg"] = msg;
+    	}
+    }
+    else if( cmd == "list_group_invitation" )
+    {
+    	bool list_group_invitation_res = list_group_invitation( recv_msg, return_msg, msg );
+    	if( list_group_invitation_res )
+    	{
+    		return_msg["status"] = true;
+    	}
+    	else
+    	{
+    		return_msg["msg"] = msg;
+    	}
+    }
+    else if( cmd == "list_group_request" )
+    {
+    	bool list_group_request_res = list_group_request( recv_msg, return_msg, msg );
+    	if( list_group_request_res )
+    	{
+    		return_msg["status"] = true;
+    	}
+    	else
+    	{
+    		return_msg["msg"] = msg;
+    	}
+    }
+    else if( cmd == "get_chat_friend_history" )
+    {
+    	bool get_chat_friend_history_res = get_chat_friend_history( recv_msg, return_msg, msg );
+    	if( get_chat_friend_history_res )
+    	{
+    		return_msg["status"] = true;
+    	}
+    	else
+    	{
+    		return_msg["msg"] = msg;
+    	}
+    }
+    else if( cmd == "get_chat_group_history" )
+    {
+    	bool get_chat_group_history_res = get_chat_group_history( recv_msg, return_msg, msg );
+    	if( get_chat_group_history_res )
+    	{
+    		return_msg["status"] = true;
+    	}
+    	else
+    	{
+    		return_msg["msg"] = msg;
+    	}
+    }
+    else if( cmd == "get_friends" )
+    {
+    	bool get_friends_res = get_friends( recv_msg, return_msg, msg );
+    	if( get_friends_res )
+    	{
+    		return_msg["status"] = true;
+    	}
+    	else
+    	{
+    		return_msg["msg"] = msg;
+    	}
+    }
+    else if( cmd == "get_groups" )
+    {
+    	bool get_groups_res = get_groups( recv_msg, return_msg, msg );
+    	if( get_groups_res )
+    	{
+    		return_msg["status"] = true;
+    	}
+    	else
+    	{
+    		return_msg["msg"] = msg;
+    	}
     }
 
     // send massage to client
@@ -732,11 +1165,6 @@ void process_msg( const json recv_msg, const int fd )
         printf("send fail\n");
     } else {
         printf("send complete\n");
-    }
-    //
-    if (cmd == "get_chat_friend_history") {
-        printf("worm\n");
-        send_sys_msg(fd, "worm");
     }
 }
 
@@ -836,7 +1264,6 @@ void * thread_func(void * data)
         g_mutex_unlock(&alive_socket_mutex);
     }
 }
-
 
 int main(int argc, char * argv[])
 {

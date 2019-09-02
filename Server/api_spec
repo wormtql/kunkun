@@ -469,7 +469,7 @@ list_group_invitation
         ]
     }
     db:
-    bool ( string username, vector<struct>&list, string &msg )
+    bool ( string username, vector<json>&list, string &msg )
 
 
 // 群主收到的加群请求
@@ -496,7 +496,7 @@ list_group_request
         ]
     }
     db:
-    bool ( string username, vector<struct>&list, string &msg )
+    bool ( string username, vector<json>&list, string &msg )
 
 get_chat_friend_history
     client:
@@ -561,7 +561,7 @@ get_friends
         ]
     }
     db:
-    bool ( string username, vector<struct>&list, string &msg )
+    bool ( string username, vector<json>&list, string &msg )
 
 get_groups
     client: 
@@ -584,7 +584,7 @@ get_groups
         ]
     }
     db:
-    bool ( string username, vector<struct>&list, string &msg )
+    bool ( string username, vector<json>&list, string &msg )
 
 db:
 // 查找群名
@@ -594,10 +594,15 @@ bool _find_group_creater( int groupid, string &creater, string &msg )
 // 查找聊天记录路径
 bool _find_chat_path( string username1, string username2, string &path, string &msg )
 // 查找群聊记录路径
-bool _find_group_path( int group id, string &path, string &msg )
+bool _find_group_path( int groupid, string &path, string &msg )
 // 修改未读关系
 bool _update_unread( string from_username, string to_username, string &msg ) // 修改to_username的好友未读
 // 获取群聊成员名单
 bool _get_group_members( int groupid, vector<string>&members, string &msg ) // 包括群主
+// 查找文件路径
+bool _find_file_path( int fileid, string &path, string &msg )
+// 查找文件名
+bool _find_file_name( int fileid, string &filename, string &msg )
+
 ...
 
