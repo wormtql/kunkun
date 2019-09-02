@@ -341,20 +341,20 @@ group_recv_msg
         }
     }
     
-// 聊天发送文件申请
-chat_send_file_begin
+// 聊天/群聊发送文件申请
+send_file_begin
     client:
     {
         "command": "chat_send_file_begin",
         "filename": "[filename]",
-        "from": "[username]",
-        "to": "[username]",
+        //"from": "[username]",
+        //"to": "[username]",
     }
     server:
     {
         "command": "chat_send_file_begin",
         "status": [true | false],
-        "filename": "[filename]",
+        //"filename": "[filename]",
         "fileid": [fileid], // 服务器给文件分配id
         "msg": "..."
     }
@@ -366,6 +366,8 @@ chat_send_file
     client:
     {
         "command": "chat_send_file",
+        "from": "[username]",
+        "to": "[username]",
         "fileid": [fileid], // 申请时服务器返回的文件id
         "eof": [true | false], // 文件是否读入完成
         "content": "[filecontent]", // 文件内容
@@ -377,27 +379,22 @@ chat_send_file
         "msg": "..."
     }
 
-
-group_send_file_begin
+group_send_file
     client:
     {
-        "command": "group_send_file_begin",
-        "filename": "[filename]",
+        "command": "chat_send_file",
         "from": "[username]",
-        "group_id": "[..]",
+        "group_id": [...],
+        "fileid": [fileid], // 申请时服务器返回的文件id
+        "eof": [true | false], // 文件是否读入完成
+        "content": "[filecontent]", // 文件内容
     }
     server:
     {
-        "command": "...",
-        "status": ...,
-        "msg": ...,
-        "filename": "...",
-        "file_id": "...",
+        "command": "chat_send_file", 
+        "status": [true | false],
+        "msg": "..."
     }
-
-// 与chat_send_file一样，command也一样
-group_send_file
-
 
 send_me_a_file
     client:
