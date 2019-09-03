@@ -55,14 +55,16 @@ public:
 
     int send_string(const std::string & message);
 
-
-    int send_image_from_file(const std::string & filename);
-
-
-    int send_image_from_pixbuf(GdkPixbuf * image);
+    int send_char_arr(char * content, int size);
 
 
-    int send_file_from_file(const std::string & filename);
+//    int send_image_from_file(const std::string & filename);
+
+
+//    int send_image_from_pixbuf(GdkPixbuf * image);
+
+
+//    int send_file_from_file(const std::string & filename);
 };
 
 

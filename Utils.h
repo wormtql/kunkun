@@ -19,6 +19,14 @@ public:
     static GdkPixbuf * get_clipped_image(GdkPixbuf * image, int radius);
 
     static GdkPixbuf * load_from_file(const std::string & file, int size);
+
+    static GtkWidget * create_button_with_icon(str file, int size);
+
+    static GtkWidget * create_image_from_file_at_size(str file, int size);
+
+    static GtkWidget * create_image_from_file_at_size(str file, int width, int height);
+
+    static std::string get_filename_from_path(str path);
 };
 
 

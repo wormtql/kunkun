@@ -29,7 +29,7 @@ public:
      * create group
      *
      */
-    static json create_group_blocked(const std::string & who, const std::string & group_name);
+    static json create_group(const std::string & who, const std::string & group_name);
 
 
     /*
@@ -122,13 +122,13 @@ public:
     static void request_join_group(const std::string & from, const std::string & group_id);
 
 
-    static void chat_send_file_begin(const std::string & from, const std::string & to, const std::string & filename, SocketCallback callback);
+    static void send_file_begin(const std::string & filename, SocketCallback callback);
 
 
-    static void chat_send_file(const std::string & file_id, bool eof, const std::string & content);
+    static void chat_send_file(const std::string & file_id, str from, str to, bool eof, char * content, int size);
 
 
-    static void group_send_file_begin(str from, str group_id, str filename, SocketCallback callback);
+//    static void group_send_file_begin(str from, str group_id, str filename, SocketCallback callback);
 
 
     static void send_me_a_file(str fileid);
@@ -159,6 +159,8 @@ public:
 
 
     static json group_send_msg(const std::string & from, const std::string & group_id, const std::string & msg);
+
+
 
 
 //    static json chat_send_file_begin(const std::string & sender, const std::string & recipient, const std::string & filename, SocketCallback callback);

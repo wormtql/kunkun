@@ -46,14 +46,17 @@ req
 
 res
     [true | false]
-        f-req   // 接受好友请求
+        f-req   // 好友请求
             username
-        g-inv   // 接受群组邀请
+        g-inv   // 群组邀请
             group_id
-        g-req   // 接受进群请求
+        g-req   // 进群请求
             username
                 group_id
 
+create
+    group
+        name
 
 
 clear

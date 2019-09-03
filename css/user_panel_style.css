@@ -15,12 +15,26 @@
 }
 
 #user_panel .user_panel_field_box {
-    margin: 0px 280px;
+    margin: 0px 240px;
     padding: 16px 0;
     border-bottom: 1px solid gray;
+    /*background: red;*/
 }
 
-#user_panel .user_panel_entry {
+#user_panel #username_label {
+    margin-right: 200px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+#user_panel .radio {
+    border: none;
+    margin: 10px 5px;
+}
+
+#user_panel #sign_entry {
+    min-width: 210px;
+
     background: none;
     border: none;
     transition: 300ms;
@@ -28,6 +42,6 @@
     margin-right: 0;
 }
 
-#user_panel .user_panel_entry:focus {
+#user_panel #sign_entry:focus {
     background: rgba(0, 0, 0, 0.1);
 }

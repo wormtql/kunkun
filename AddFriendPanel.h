@@ -24,7 +24,7 @@ private:
 
     GtkWidget * search_result = nullptr;
 
-    GtkWidget * status_bar = nullptr;
+//    GtkWidget * status_bar = nullptr;
 
     AddFriendPanel();
 

@@ -73,3 +73,55 @@ GdkPixbuf* Utils::load_from_file(const std::string &file, int size) {
         return gdk_pixbuf_new_from_file_at_size(file.c_str(), size, size, nullptr);
     }
 }
+
+GtkWidget* Utils::create_button_with_icon(const std::string &file, int size) {
+    GdkPixbuf * pix = gdk_pixbuf_new_from_file_at_size(file.c_str(), size, size, nullptr);
+
+    GtkWidget * image = gtk_image_new_from_pixbuf(pix);
+
+    GtkWidget * button = gtk_button_new();
+
+    gtk_container_add(GTK_CONTAINER(button), image);
+
+    return button;
+}
+
+GtkWidget* Utils::create_image_from_file_at_size(const std::string &file, int size) {
+    GdkPixbuf * pix;
+    if (size <= 0) {
+        pix = gdk_pixbuf_new_from_file(file.c_str(), nullptr);
+    } else {
+        pix = gdk_pixbuf_new_from_file_at_size(file.c_str(), size, size, nullptr);
+
+    }
+
+    return gtk_image_new_from_pixbuf(pix);
+}
+
+std::string Utils::get_filename_from_path(const std::string &path) {
+    std::string temp;
+
+    for (int i = (int)path.size() - 1; i >= 0; i--) {
+        if (path[i] == '\\' || path[i] == '/') {
+            break;
+        }
+
+        temp.push_back(path[i]);
+    }
+
+    std::reverse(temp.begin(), temp.end());
+
+    return temp;
+}
+
+GtkWidget* Utils::create_image_from_file_at_size(const std::string &file, int width, int height) {
+    GdkPixbuf * pix;
+    if (height <= 0 || width <= 0) {
+        pix = gdk_pixbuf_new_from_file(file.c_str(), nullptr);
+    } else {
+        pix = gdk_pixbuf_new_from_file_at_size(file.c_str(), width, height, nullptr);
+
+    }
+
+    return gtk_image_new_from_pixbuf(pix);
+}

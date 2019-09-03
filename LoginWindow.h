@@ -19,7 +19,7 @@ private:
     GtkWidget * button_login_switch = nullptr;
     GtkWidget * button_signup_switch = nullptr;
 
-    GtkWidget * label_error = nullptr;
+//    GtkWidget * label_error = nullptr;
 
     std::function<void ()> func;
 
@@ -39,6 +39,15 @@ private:
     static void btn_login_clicked(GtkWidget * widget, gpointer data);
 
     static void btn_signup_clicked(GtkWidget * widget, gpointer data);
+
+
+    int x, y;
+    int drag = false;
+    static gint button_press_event(GtkWidget * widget, GdkEventButton * event, gpointer data);
+
+    static gint button_release_event(GtkWidget * widget, GdkEventButton * event, gpointer data);
+
+    static gint motion_notify_event(GtkWidget * widget, GdkEventButton * event, gpointer data);
 
 public:
 

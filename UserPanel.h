@@ -13,9 +13,16 @@ private:
     GtkWidget * root = nullptr;
 
     GtkWidget * avatar;
-    GtkWidget * entry_username;
+//    GtkWidget * entry_username;
+
+    GtkWidget * username_label = nullptr;
+
     GtkWidget * entry_sign;
-    GtkWidget * entry_gender;
+//    GtkWidget * entry_gender;
+
+    GtkWidget * radio_male;
+    GtkWidget * radio_female;
+    GtkWidget * radio_secret;
 
     UserPanel();
 
@@ -27,7 +34,7 @@ private:
 
     static int on_sign_enter(GtkWidget * widget, gpointer data);
 
-    static int on_gender_enter(GtkWidget * widget, gpointer data);
+    static int on_gender_radio_clicked(GtkWidget * widget, gpointer data);
 
 
 public:

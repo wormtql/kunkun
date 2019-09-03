@@ -12,12 +12,16 @@ private:
     struct Data {
         std::string filename;
         std::string fileid;
+        std::string from;
+        std::string to;
         FileSendCallback callback;
     };
 
-    static void* thread_func(void *);
+//    static void* thread_func(void *);
 public:
-    static void send_file(str filename, str fileid, FileSendCallback callback);
+    static void chat_send_file(str from, str to, str filename, str fileid, FileSendCallback callback);
+
+    static void group_send_file(str from, str group_id, str fileid, FileSendCallback callback);
 };
 
 

@@ -8,6 +8,13 @@
 
 class MainWindow {
 private:
+    struct Data {
+        MainWindow * window;
+        std::string msg;
+        GtkWidget * widget;
+        GMainContext * context;
+    };
+private:
     GtkWidget * window = nullptr;
 
     GtkWidget * top_bar = nullptr;
@@ -38,6 +45,15 @@ private:
     static void on_button_add_friend_clicked(GtkWidget * widget, gpointer data);
 
     static void on_button_console_clicked(GtkWidget * widget, gpointer data);
+
+
+    int x, y;
+    int drag = false;
+    static gint button_press_event(GtkWidget * widget, GdkEventButton * event, gpointer data);
+
+    static gint button_release_event(GtkWidget * widget, GdkEventButton * event, gpointer data);
+
+    static gint motion_notify_event(GtkWidget * widget, GdkEventButton * event, gpointer data);
 
 public:
     static MainWindow * create();

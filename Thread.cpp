@@ -26,6 +26,7 @@ void * Thread::service_func(void *) {
 
         g_mutex_lock(&mutex);
 
+        memset(buf, 0, sizeof(buf));
         int status = Client::getIns()->recv_msg(buf);
 
         if (status == -1) {
@@ -104,7 +105,7 @@ void Thread::set_call_back(const std::string &type, SocketCallback callback) {
         chat_recv_msg_cb = callback;
     } else if (type == "group_recv_msg") {
         group_recv_msg_cb = callback;
-    } else if (type == "recv_add_friend_result") {
+    } else if (type == "recv_sys_msg") {
         recv_sys_msg_cb = callback;
     } else if (type == "recv_file") {
         recv_file_cb = callback;

@@ -177,7 +177,7 @@ void ConsolePanel::process_command(const std::string &cmd) {
                     if (argv.size() < 4) {
                         too_few_arg_flag = true;
                     } else {
-                        ClientUtils::send_add_friend_result(DataHub::getIns()->username, argv[3], ans);
+                        ClientUtils::send_add_friend_result(argv[3], DataHub::getIns()->username, ans);
                         my_print("sent\n");
                     }
 
@@ -186,7 +186,7 @@ void ConsolePanel::process_command(const std::string &cmd) {
                     if (argv.size() < 4) {
                         too_few_arg_flag = true;
                     } else {
-                        ClientUtils::send_invite_to_group_result(DataHub::getIns()->username, argv[3], ans);
+                        ClientUtils::send_join_group_result(argv[3], argv[4], ans);
                         my_print("sent\n");
                     }
 
@@ -195,7 +195,7 @@ void ConsolePanel::process_command(const std::string &cmd) {
                     if (argv.size() < 5) {
                         too_few_arg_flag = true;
                     } else {
-                        ClientUtils::send_join_group_result(argv[3], argv[4], ans);
+                        ClientUtils::send_invite_to_group_result(DataHub::getIns()->username, argv[3], ans);
                         my_print("sent\n");
                     }
 
@@ -206,6 +206,19 @@ void ConsolePanel::process_command(const std::string &cmd) {
     else if (argv[0] == "clear")
     {
         gtk_text_buffer_set_text(text_buffer, "", 0);
+    }
+    else if (argv[0] == "create") {
+        if (argv.size() < 2) {
+            too_few_arg_flag = true;
+        } else {
+            if (argv[1] == "group") {
+                if (argv.size() < 3) {
+                    too_few_arg_flag = true;
+                } else {
+                    ClientUtils::create_group(DataHub::getIns()->username, argv[2]);
+                }
+            }
+        }
     }
     else
     {

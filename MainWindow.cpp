@@ -20,6 +20,15 @@ MainWindow::MainWindow() {
     gtk_window_set_default_size(GTK_WINDOW(this->window), 900, 600);
     gtk_widget_set_name(window, "main_window");
 
+    gtk_widget_set_events(this->window, GDK_BUTTON_PRESS_MASK | GDK_BUTTON1_MOTION_MASK);
+
+//    g_signal_connect(this->top_bar, "button_press_event", G_CALLBACK(LoginWindow::button_press_event), this);
+    g_signal_connect(this->window, "button_press_event", G_CALLBACK(MainWindow::button_press_event), this);
+//    g_signal_connect(this->top_bar, "button_release_event", G_CALLBACK(LoginWindow::button_release_event), this);
+    g_signal_connect(this->window, "button_release_event", G_CALLBACK(MainWindow::button_release_event), this);
+//    g_signal_connect(this->top_bar, "motion_notify_event", G_CALLBACK(LoginWindow::motion_notify_event), this);
+    g_signal_connect(this->window, "motion_notify_event", G_CALLBACK(MainWindow::motion_notify_event), this);
+
     GtkWidget * root = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_container_add(GTK_CONTAINER(window), root);
 
@@ -30,6 +39,7 @@ MainWindow::MainWindow() {
     gtk_box_pack_start(GTK_BOX(root), body, TRUE, TRUE, 0);
 
     MainWindow::on_button_user_clicked(nullptr, this);
+
 
 
     Thread::set_call_back("recv_file", [this] (str data) {
@@ -60,23 +70,56 @@ MainWindow::MainWindow() {
 
     });
 
-    Thread::set_call_back("recv_sys_msg", [this] (str data) {
+    GMainContext * context = g_main_context_get_thread_default();
+//    Data * data = new Data;
+//    data->context = context;
+//    data->widget = lbl;
+
+    Thread::set_call_back("recv_sys_msg", [this, context] (str data) {
         json j = json::parse(data);
 
         cout << "sys msg: " + (string)j["msg"] << "\n";
 
-        GtkWidget * lbl = gtk_label_new(("系统消息：" + (string)j["msg"]).c_str());
-        gtk_widget_set_name(lbl, "top_label");
 
-        gtk_box_pack_start(GTK_BOX(this->top_bar), lbl, TRUE, TRUE, 0);
-        gtk_widget_show_all(lbl);
+        Data * d = new Data;
+        d->msg = "系统消息：" + (string)j["msg"];
+        d->window = this;
 
-        g_timeout_add(5000, [] (gpointer data) -> gboolean {
+        g_main_context_invoke(context, [] (gpointer user_data) -> gboolean {
 
-            gtk_widget_destroy((GtkWidget *)data);
+            printf("invoked\n");
+
+            auto d = (Data *)user_data;
+            auto window = d->window;
+
+            GtkWidget * prev = Utils::find_child(window->top_bar, "top_label");
+            if (prev) {
+                gtk_widget_destroy(prev);
+            }
+
+            GtkWidget * lbl = gtk_label_new(d->msg.c_str());
+//            GtkWidget
+            gtk_widget_set_name(lbl, "top_label");
+
+            gtk_box_pack_start(GTK_BOX(window->top_bar), lbl, TRUE, TRUE, 0);
+            gtk_widget_show_all(lbl);
+
+            g_timeout_add(5000, [] (gpointer data) -> gboolean {
+
+                auto w = (GtkWidget *)data;
+
+                if (GTK_IS_WIDGET(w)) {
+                    gtk_widget_destroy(w);
+                }
+
+                return false;
+            }, lbl);
 
             return false;
-        }, lbl);
+
+        }, d);
+
+
 
     });
 }
@@ -92,25 +135,29 @@ GtkWidget* MainWindow::create_side_bar() {
 
 
     // button user
-    GtkWidget * button_user = gtk_button_new_from_icon_name("go-bottom", GTK_ICON_SIZE_BUTTON);
+//    GtkWidget * button_user = gtk_button_new_from_icon_name("go-bottom", GTK_ICON_SIZE_BUTTON);
+    GtkWidget * button_user = Utils::create_button_with_icon("../assets/tag.png", 28);
     g_signal_connect(button_user, "clicked", G_CALLBACK(MainWindow::on_button_user_clicked), this);
     gtk_widget_set_name(button_user, "main_window_button_user");
 
 
     // button user
-    GtkWidget * button_friend = gtk_button_new_from_icon_name("go-bottom", GTK_ICON_SIZE_BUTTON);
+//    GtkWidget * button_friend = gtk_button_new_from_icon_name("go-bottom", GTK_ICON_SIZE_BUTTON);
+    GtkWidget * button_friend = Utils::create_button_with_icon("../assets/msg.png", 28);
     g_signal_connect(button_friend, "clicked", G_CALLBACK(MainWindow::on_button_friend_clicked), this);
     gtk_widget_set_name(button_friend, "main_window_button_friend");
 
 
     // button add friend
-    GtkWidget * button_add_friend = gtk_button_new_from_icon_name("go-bottom", GTK_ICON_SIZE_BUTTON);
+//    GtkWidget * button_add_friend = gtk_button_new_from_icon_name("go-bottom", GTK_ICON_SIZE_BUTTON);
+    GtkWidget * button_add_friend = Utils::create_button_with_icon("../assets/info.png", 28);
     g_signal_connect(button_add_friend, "clicked", G_CALLBACK(MainWindow::on_button_add_friend_clicked), this);
     gtk_widget_set_name(button_add_friend, "main_window_button_add_friend");
 
 
     // button console
-    GtkWidget * button_console = gtk_button_new_from_icon_name("go-bottom", GTK_ICON_SIZE_BUTTON);
+//    GtkWidget * button_console = gtk_button_new_from_icon_name("go-bottom", GTK_ICON_SIZE_BUTTON);
+    GtkWidget * button_console = Utils::create_button_with_icon("../assets/console.png", 24);
     g_signal_connect(button_console, "clicked", G_CALLBACK(MainWindow::on_button_console_clicked), this);
     gtk_widget_set_name(button_console, "main_window_button_console");
 
@@ -236,4 +283,47 @@ void MainWindow::on_button_console_clicked(GtkWidget *widget, gpointer data) {
 
     window->current_page = window->console_panel->widget();
     gtk_widget_show_all(window->current_page);
+}
+
+gint MainWindow::button_press_event(GtkWidget *widget, GdkEventButton *event, gpointer data) {
+//    printf("worm\n");
+
+    auto window = (MainWindow *)data;
+
+    window->x = (int)event->x;
+    window->y = (int)event->y;
+    window->drag = true;
+
+    return TRUE;
+}
+
+gint MainWindow::button_release_event(GtkWidget *widget, GdkEventButton *event, gpointer data) {
+
+//    printf("release\n");
+
+    auto window = (MainWindow *)data;
+
+    window->drag = false;
+
+    return TRUE;
+}
+
+gint MainWindow::motion_notify_event(GtkWidget *widget, GdkEventButton *event, gpointer data) {
+
+//    printf("motion\n");
+
+    auto window = (MainWindow *)data;
+    if (window->drag) {
+
+//        printf("aaa\n");
+
+        int x, y;
+        gtk_window_get_position(GTK_WINDOW(window->window), &x, &y);
+
+        gtk_window_move(GTK_WINDOW(window->window), x + event->x - window->x, y + event->y - window->y);
+//        window->x = event->x;
+//        window->y = event->y;
+    }
+
+    return TRUE;
 }

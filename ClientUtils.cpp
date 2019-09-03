@@ -116,6 +116,8 @@ json ClientUtils::get_friends(const std::string &who)
 
     Thread::resume_recv();
 
+    printf("server: %s\n", buf);
+
     json retj = json::parse(buf);
     if (retj["debug"])
     {
@@ -248,6 +250,8 @@ json ClientUtils::alter_user_info(const std::string &who, const std::string &fie
 
     Thread::resume_recv();
 
+
+
     return json::parse(buf);
 }
 
@@ -267,9 +271,11 @@ std::string ClientUtils::get_user_info(const std::string &who, const std::string
 
     json retj = json::parse(buf);
 
+    printf("server: %s\n", buf);
+
     if (retj["debug"])
     {
-        return "debug";
+        return "male";
     }
     else
     {
@@ -283,27 +289,27 @@ std::string ClientUtils::get_user_info(const std::string &who, const std::string
 
 
 // 阻塞的 create group
-json ClientUtils::create_group_blocked(const std::string &who, const std::string &group_name) {
-    // 阻塞接收
-
-    Thread::stop_recv();
-
-    json j;
-    j["command"] = "create_group";
-    j["who"] = who;
-    j["group_name"] = group_name;
-
-    Client::getIns()->send_string(j.dump());
-
-    char buf[CLIENT_BUF_SIZE];
-    Client::getIns()->recv_blocked(buf);
-
-
-    Thread::resume_recv();
-
-
-    return json::parse(buf);
-}
+//json ClientUtils::create_group(const std::string &who, const std::string &group_name) {
+//    // 阻塞接收
+//
+//    Thread::stop_recv();
+//
+//    json j;
+//    j["command"] = "create_group";
+//    j["who"] = who;
+//    j["group_name"] = group_name;
+//
+//    Client::getIns()->send_string(j.dump());
+//
+//    char buf[CLIENT_BUF_SIZE];
+//    Client::getIns()->recv_blocked(buf);
+//
+//
+//    Thread::resume_recv();
+//
+//
+//    return json::parse(buf);
+//}
 
 // 阻塞的 rename group
 json ClientUtils::rename_group_blocked(int group_id, const std::string &new_name, const std::string & who) {
@@ -342,9 +348,14 @@ json ClientUtils::send_add_friend_request(const std::string &from, const std::st
 
     Client::getIns()->send_string(j.dump());
 
+    memset(buf, 0, sizeof(buf));
     Client::getIns()->recv_blocked(buf);
 
+    printf("server: %s\n", buf);
+
     Thread::resume_recv();
+
+    return json::parse(buf);
 }
 
 void ClientUtils::request_join_group(const std::string &from, const std::string &group_id) {
@@ -362,14 +373,14 @@ void ClientUtils::request_join_group(const std::string &from, const std::string 
     Thread::resume_recv();
 }
 
-void ClientUtils::chat_send_file_begin(const std::string &from, const std::string &to, const std::string &filename,
+void ClientUtils::send_file_begin(const std::string &filename,
         SocketCallback callback) {
     Thread::stop_recv();
 
     json j;
     j["command"] = "chat_send_file_begin";
-    j["from"] = from;
-    j["to"] = to;
+//    j["from"] = from;
+//    j["to"] = to;
     j["filename"] = filename;
 
     Client::getIns()->send_string(j.dump());
@@ -381,39 +392,50 @@ void ClientUtils::chat_send_file_begin(const std::string &from, const std::strin
     callback(buf);
 }
 
-void ClientUtils::chat_send_file(const std::string &file_id, bool eof, const std::string &content) {
+void ClientUtils::chat_send_file(const std::string &file_id, str from, str to, bool eof, char * content, int size) {
     Thread::stop_recv();
 
     json j;
     j["command"] = "chat_send_file";
     j["eof"] = eof;
-    j["content"] = content;
-
-    Client::getIns()->send_string(j.dump());
-
-    Client::getIns()->recv_blocked(buf);
-
-    Thread::resume_recv();
-}
-
-void ClientUtils::group_send_file_begin(const std::string &from, const std::string &group_id,
-                                        const std::string &filename, SocketCallback callback) {
-    Thread::stop_recv();
-
-    json j;
-    j["command"] = "group_send_file_begin";
     j["from"] = from;
-    j["group_id"] = group_id;
-    j["filename"] = filename;
+    j["to"] = to;
+//    j["size"] = size;
+//    j["content"] = content;
 
-    Client::getIns()->send_string(j.dump());
+    std::string d = j.dump();
+
+    char sbuf[2048] = { 0 };
+    sprintf(sbuf, "%s", d.c_str());
+    memcpy(sbuf + d.size(), content, size);
+
+//    Client::getIns()->send_string(j.dump());
+
+    Client::getIns()->send_char_arr(sbuf, size + d.size());
 
     Client::getIns()->recv_blocked(buf);
 
     Thread::resume_recv();
-
-    callback(buf);
 }
+//
+//void ClientUtils::group_send_file_begin(const std::string &from, const std::string &group_id,
+//                                        const std::string &filename, SocketCallback callback) {
+//    Thread::stop_recv();
+//
+//    json j;
+//    j["command"] = "group_send_file_begin";
+//    j["from"] = from;
+//    j["group_id"] = group_id;
+//    j["filename"] = filename;
+//
+//    Client::getIns()->send_string(j.dump());
+//
+//    Client::getIns()->recv_blocked(buf);
+//
+//    Thread::resume_recv();
+//
+//    callback(buf);
+//}
 
 void ClientUtils::send_me_a_file(const std::string &fileid) {
     Thread::stop_recv();
@@ -487,7 +509,7 @@ json ClientUtils::list_group_request(const std::string &username) {
     Thread::stop_recv();
 
     json j;
-    j["command"] = "list_friend_request";
+    j["command"] = "list_group_request";
     j["username"] = username;
 
     Client::getIns()->send_string(j.dump());
@@ -497,6 +519,8 @@ json ClientUtils::list_group_request(const std::string &username) {
     Thread::resume_recv();
 
     json retj = json::parse(buf);
+
+    printf("list_group_req return: %s\n", buf);
 
     if (retj["debug"]) {
         return R"([{
@@ -519,9 +543,12 @@ json ClientUtils::send_add_friend_result(const std::string &from, const std::str
 
     Client::getIns()->send_string(j.dump());
 
+    memset(buf, 0, sizeof(buf));
     Client::getIns()->recv_blocked(buf);
 
     Thread::resume_recv();
+
+    printf("server: %s\n", buf);
 
     return json::parse(buf);
 }
@@ -595,6 +622,26 @@ json ClientUtils::group_send_msg(const std::string & from, const std::string & g
     j["from"] = from;
     j["group_id"] = group_id;
     j["content"] = msg;
+
+    Client::getIns()->send_string(j.dump());
+
+//    char buf[CLIENT_BUF_SIZE];
+    Client::getIns()->recv_blocked(buf);
+
+
+    Thread::resume_recv();
+
+
+    return json::parse(buf);
+}
+
+json ClientUtils::create_group(const std::string &who, const std::string &group_name) {
+    Thread::stop_recv();
+
+    json j;
+    j["command"] = "create_group";
+    j["who"] = who;
+    j["group_name"] = group_name;
 
     Client::getIns()->send_string(j.dump());
 

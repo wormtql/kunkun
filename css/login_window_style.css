@@ -6,10 +6,12 @@
 #login_window {
     border-top: 4px solid #00b0ff;
     background-color: white;
+    /*padding-bottom: 500px;*/
+    /*min-height: 00px;*/
 }
 
 #login_window #top_bar {
-    /*background: rgba(0, 0, 0, 0.5);*/
+    background: #f5f4f0;
 }
 
 #login_window #close_button {
@@ -39,7 +41,7 @@
 }
 
 #login_window #field_username {
-    margin-top: 100px;
+    margin-top: 80px;
 }
 
 #login_window #field_password {
@@ -87,7 +89,7 @@
 #login_window #button_signup_confirm {
     min-height: 25px;
     min-width: 25px;
-    margin: 70px 230px 0 230px;
+    margin: 70px 235px 0px 235px;
     background: crimson;
     transition: 300ms;
     color: white;
@@ -109,11 +111,12 @@
 }
 
 #login_window #label_error {
-    background: #b80700;
-    min-height: 64px;
+    background: linear-gradient(45deg, crimson, #ff7640);
+    min-height: 32px;
     color: white;
-    margin: 0 100px 100px 100px;
-    border-radius: 10px;
+    /*margin: 0 100px 0 100px;*/
+    /*border-radius: 10px;*/
+    margin-top: 32px;
 }
 
 /*#login_window #login_check check {*/

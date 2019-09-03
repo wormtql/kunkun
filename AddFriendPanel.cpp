@@ -10,9 +10,13 @@ AddFriendPanel::AddFriendPanel() {
     gtk_widget_set_name(root, "add_friend_panel");
 
 
-    GtkWidget * label = gtk_label_new("发现身边的IKUN");
-    gtk_widget_set_name(label, "add_friend_panel_header");
-    gtk_box_pack_start(GTK_BOX(root), label, FALSE, FALSE, 0);
+//    GtkWidget * label = gtk_label_new("发现身边的IKUN");
+//    gtk_widget_set_name(label, "add_friend_panel_header");
+//    gtk_box_pack_start(GTK_BOX(root), label, FALSE, FALSE, 0);
+
+//    GtkWidget * image = Utils::create_image_from_file_at_size("../assets/kunkun.png", -1);
+    GtkWidget * image = Utils::create_image_from_file_at_size("../assets/kunkun.png", 240, 180);
+    gtk_box_pack_start(GTK_BOX(root), image, FALSE, FALSE, 0);
 
 
     search_bar = gtk_search_entry_new();
@@ -63,6 +67,10 @@ void AddFriendPanel::on_text_changed(GtkSearchEntry *entry, gpointer data) {
     for (json & item : j)
     {
         std::string res = item.get<std::string>();
+
+        if (res == DataHub::getIns()->username) {
+            continue;
+        }
 
         GtkWidget * widget = panel->create_search_result_item_friend(res, nullptr);
         panel->add_search_result_item(widget);
@@ -180,22 +188,27 @@ void AddFriendPanel::on_button_add_friend_clicked(GtkWidget *widget, gpointer us
         ClientUtils::request_join_group(DataHub::getIns()->username, data->id);
     }
 
-    if (panel->status_bar == nullptr) {
-        panel->status_bar = gtk_label_new("");
-        gtk_widget_set_name(panel->status_bar, "status_bar");
-        gtk_box_pack_end(GTK_BOX(panel->root), panel->status_bar, FALSE, FALSE, 0);
+    GtkWidget * prev = Utils::find_child(panel->root, "status_bar");
+    if (prev) {
+        gtk_widget_destroy(prev);
     }
-    gtk_label_set_text(GTK_LABEL(panel->status_bar), "request sent, ikun is waiting");
-//    gtk_widget_show(panel->status_bar);
-    gtk_widget_show(panel->status_bar);
+
+    GtkWidget * status_bar = gtk_label_new("request sent, ikun is waiting");
+    gtk_widget_set_name(status_bar, "status_bar");
+    gtk_box_pack_end(GTK_BOX(panel->root), status_bar, FALSE, FALSE, 0);
+
+    gtk_widget_show_all(status_bar);
 
     g_timeout_add(5000, [] (gpointer data) ->gboolean {
-        auto p = (AddFriendPanel *)data;
-//        gtk_widget_hide(label);
-        gtk_widget_destroy(p->status_bar);
-        p->status_bar = nullptr;
+        auto lbl = (GtkWidget *)data;
+
+        if (GTK_IS_WIDGET(lbl)) {
+            gtk_widget_destroy(lbl);
+        }
+
+//        p->status_bar = nullptr;
 
 
         return false;
-        }, panel);
+        }, status_bar);
 }

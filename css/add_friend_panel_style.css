@@ -14,7 +14,7 @@
 }
 
 #add_friend_panel #search_result_scroll {
-    min-height: 330px;
+    min-height: 300px;
     /*background: rgba(0, 0, 0, 0.1);*/
     margin: 32px 100px 0 100px;
     border-radius: 10px;

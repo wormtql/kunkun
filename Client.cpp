@@ -9,7 +9,7 @@
 
 const char Client::server_ip[20] = "127.0.0.1";
 const int Client::SERVER_PORT = 1234;
-const int Client::BUFSIZE = 200;
+const int Client::BUFSIZE = 2000;
 
 GMutex Client::ins_mutex;
 Client * Client::ins = nullptr;
@@ -99,6 +99,7 @@ int Client::recv_msg(char * ret) {
 
 //    g_mutex_lock(&recv_mutex);
 
+    memset(buf, 0, sizeof(char) * BUFSIZE);
     int status = (int)recv(sockfd, buf, BUFSIZE, 0);
 
     if(status == -1){
@@ -267,3 +268,13 @@ int Client::initialize_net() {
 //    printf("Finished transfer File : %s.",filename.c_str());
 //    return 1;
 //}
+
+int Client::send_char_arr(char *content, int size) {
+    g_mutex_lock(&send_mutex);
+
+    int status = (int)send(sockfd, content, size, 0);
+
+    g_mutex_unlock(&send_mutex);
+
+    return status;
+}
