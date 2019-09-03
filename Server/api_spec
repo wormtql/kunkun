@@ -377,8 +377,9 @@ chat_send_file
         "to": "[username]",
         "fileid": [fileid], // 申请时服务器返回的文件id
         "eof": [true | false], // 文件是否读入完成
-        "content": "[filecontent]", // 文件内容
+       // "content": "[filecontent]", // 文件内容
     }
+    [filecontent]
     server:
     {
         "command": "chat_send_file", 
@@ -394,14 +395,16 @@ group_send_file
         "group_id": [...],
         "fileid": [fileid], // 申请时服务器返回的文件id
         "eof": [true | false], // 文件是否读入完成
-        "content": "[filecontent]", // 文件内容
+        //"content": "[filecontent]", // 文件内容
     }
+    [filecontent]
     server:
     {
         "command": "group_send_file", 
         "status": [true | false],
         "msg": "..."
     }
+
 *******************************************end    
 
 send_me_a_file
