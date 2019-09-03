@@ -575,7 +575,7 @@ bool group_send_file( const json recv_msg, string &msg )
 	    get_group_members( group_id, group_members, msg );
 	    json to_msg;
 	    json file;
-	    file["type"] = "text";
+	    file["type"] = "file";
 	    file["file_id"] = fileid;
 	    bool res = _find_file_name( fileid, filename, msg );
 		if( !res )
@@ -587,10 +587,10 @@ bool group_send_file( const json recv_msg, string &msg )
 	    to_msg["debug"] = true;
 	    to_msg["command"] = "group_recv_msg";
 	    to_msg["from"] = username;
-	    to_msg["content"] = text;
+	    to_msg["content"] = file;
 	    json history;
 	    history["name"] = username;
-	    history["type"] = "file"; 
+	    history["type"] = "file";
 		history["file_id"] = fileid;
 		history["file_name"] = filename;
 	    string path;
