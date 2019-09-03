@@ -307,8 +307,9 @@ chat_recv_msg
         "to": "[username]",
         //"accept": [true | false],
         "content": {
-            "type": "file | text",
-
+******************************************************************begin
+            "type": "file | text | unread ",
+******************************************************************end
             // 如果是file
             "file_name": ...,
             "file_id": ...,
@@ -342,7 +343,9 @@ group_recv_msg
         "from": "[username]",
         "group_id": [group_id],
         "content": {
-            "type": "text | group",
+************************************************************************begin
+            "type": "text | file | unread ",
+************************************************************************end
             同  chat_recv_msg
         }
     }
