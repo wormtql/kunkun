@@ -226,6 +226,10 @@ send_invite_to_group_result
     client:
     {
         "command": ..,
+*******************************************begin
+        // 邀请者
+        "who": "username",
+*******************************************end
         // 被邀请者
         "whom": "username",
         "group_id": "...",
@@ -340,7 +344,8 @@ group_recv_msg
             同  chat_recv_msg
         }
     }
-    
+
+*******************************************begin
 // 聊天/群聊发送文件申请
 send_file_begin
     client:
@@ -395,6 +400,7 @@ group_send_file
         "status": [true | false],
         "msg": "..."
     }
+*******************************************end    
 
 send_me_a_file
     client:
@@ -577,7 +583,8 @@ get_groups
         "list":
         [
             {
-                "name": "[username]",
+                "name": "[groupname]",
+                "id" : "[groupid]",
                 "tag": "[tag]"
             },
             ...
@@ -603,6 +610,12 @@ bool _get_group_members( int groupid, vector<string>&members, string &msg ) // �
 bool _find_file_path( int fileid, string &path, string &msg )
 // 查找文件名
 bool _find_file_name( int fileid, string &filename, string &msg )
+// 拒绝好友请求
+bool _refuse_add_friend( string from_name, string to_name, string &msg ) // from_name为申请人
+// 拒绝群聊申请
+bool _refuse_request_group( string username, int groupid, string &msg )
+// 拒绝群聊邀请
+bool _refuse_invite_group( string from_name, string to_name, int groupid, string &msg ) // from_name为邀请者，to_name为被邀请人
 
 ...
 
