@@ -783,19 +783,39 @@ json init_return_json( const json recv_msg )
 
 bool recv_file( const int fileid, const int fd )
 {
-    // require a lock
-
-    char file_url[50] = {0};
-    string filename = find_filename( fileid, file_url ); // with mysql ... mzh
-    FILE *fp = fopen( file_url, "rb" );
-    if(fp == NULL){
-        return 0;
-    }
-    fp_fd new_file( filename, fileid, fp, fd );
-    alive_file.insert( new_file );
-
-    // require a lock
+	json to_msg;
+	to_msg["debug"] = true;
+	to_msg["command"] = "recv_file";
+	to_msg["fileid"] = fileid;
+	string filename, msg;
+	bool res = _find_file_name( fileid, filename, msg );
+	if( !res )
+	{
+		printf("find file %d name failed\n", fileid );
+		return false;
+	}
+	
 }
+
+bool send_me_a_file( const json recv_msg, string &msg )
+{
+
+}
+// bool recv_file( const int fileid, const int fd )
+// {
+//     // require a lock
+
+//     char file_url[50] = {0};
+//     string filename = find_filename( fileid, file_url ); // with mysql ... mzh
+//     FILE *fp = fopen( file_url, "rb" );
+//     if(fp == NULL){
+//         return 0;
+//     }
+//     fp_fd new_file( filename, fileid, fp, fd );
+//     alive_file.insert( new_file );
+
+//     // require a lock
+// }
 
 void process_msg( const json recv_msg, const int fd )
 {
@@ -1069,7 +1089,15 @@ void process_msg( const json recv_msg, const int fd )
     }
     else if( cmd == "send_me_a_file" ) // todo
     {
-        // recv_file(recv_msg["fileid"]);
+        bool send_me_a_file_res = send_me_a_file( recv_msg );
+        if( send_me_a_file_res )
+        {
+        	return_msg["status"] = true;
+        }
+        else
+        {
+        	return_msg["msg"] = msg;
+        }
     }
     else if( cmd == "list_friend_request" )
     {
@@ -1171,48 +1199,48 @@ void process_msg( const json recv_msg, const int fd )
 const char debug_str[100] = "{\"debug\":true}";
 
 // process file thread function
-void * file_thread_func( void *data )
-{
-    char buffer[1024];
-    int buffer_size;
-    json send_msg;
-    send_msg["command"] = "recv_file";
-    printf("file_thread_started\n");
-    while (1) {
-        // require lock;
+// void * file_thread_func( void *data )
+// {
+//     char buffer[1024];
+//     int buffer_size;
+//     json send_msg;
+//     send_msg["command"] = "recv_file";
+//     printf("file_thread_started\n");
+//     while (1) {
+//         // require lock;
 
-        auto iter = alive_file.begin();
-        while( iter != alive_file.end() )
-        {
-            int fd = (*iter).fd;
-            FILE *fp = (*iter).fp;
-            send_msg["filename"] = (*iter).filename;
-            send_msg["fileid"] = (*iter).fileid;
-            buffer_size = fread(buffer, 1, BUF_SIZE, fp);
-            if( buffer_size == 0 )
-            {
-                send_msg["eof"] = true;
-                string s = send_msg.dump();
-                char *c = s.data;
-                send( fd, c, strlen(c), 0 );
-                fclose( fp );
-                alive_file.erase( iter );
-                continue;
-            }
-            else
-            {
-                send_msg["eof"] = false;
-                string s = buffer;
-                send_msg["content"] = s;
-                send( fd, buffer, buffer_size, 0);
-            }
-            iter ++;
-        }
+//         auto iter = alive_file.begin();
+//         while( iter != alive_file.end() )
+//         {
+//             int fd = (*iter).fd;
+//             FILE *fp = (*iter).fp;
+//             send_msg["filename"] = (*iter).filename;
+//             send_msg["fileid"] = (*iter).fileid;
+//             buffer_size = fread(buffer, 1, BUF_SIZE, fp);
+//             if( buffer_size == 0 )
+//             {
+//                 send_msg["eof"] = true;
+//                 string s = send_msg.dump();
+//                 char *c = s.data;
+//                 send( fd, c, strlen(c), 0 );
+//                 fclose( fp );
+//                 alive_file.erase( iter );
+//                 continue;
+//             }
+//             else
+//             {
+//                 send_msg["eof"] = false;
+//                 string s = buffer;
+//                 send_msg["content"] = s;
+//                 send( fd, buffer, buffer_size, 0);
+//             }
+//             iter ++;
+//         }
 
-        // require lock
+//         // require lock
 
-    }
-}
+//     }
+// }
 
 // user functional thread function
 void * thread_func(void * data)
