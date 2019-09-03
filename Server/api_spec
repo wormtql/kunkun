@@ -621,8 +621,10 @@ bool _refuse_add_friend( string from_name, string to_name, string &msg ) // from
 bool _refuse_request_group( string username, int groupid, string &msg )
 // 拒绝群聊邀请
 bool _refuse_invite_group( string from_name, string to_name, int groupid, string &msg ) // from_name为邀请者，to_name为被邀请人
-// 获取未读列表
-bool _get_unread_list( string username, vector<string>&list, string &msg )
+// 获取聊天未读列表
+bool _get_unread_list( string username, vector<string>&list, string &msg ) // list为username
+// 获取群聊未读列表
+bool _get_unread_group_list( string username, vector<string>&list, string &msg ) // list为(string)group_id
 
 ...
 
