@@ -7,7 +7,8 @@
 #include "Client.h"
 
 
-const char Client::server_ip[20] = "127.0.0.1";
+//const char Client::server_ip[20] = "127.0.0.1";
+const char Client::server_ip[20] = "10.194.139.213";
 const int Client::SERVER_PORT = 1234;
 const int Client::BUFSIZE = 20000;
 

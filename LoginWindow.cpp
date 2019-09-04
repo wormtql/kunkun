@@ -209,6 +209,16 @@ void LoginWindow::btn_login_clicked(GtkWidget *widget, gpointer data) {
     bool succ = false;
     std::string msg;
 
+    if (!Utils::check_valid_string(username)) {
+        window->set_error_info("字段必须为数字、大小写字母、下划线");
+        return;
+    }
+
+    if (!Utils::check_valid_string(password)) {
+        window->set_error_info("字段必须为数字、大小写字母、下划线");
+        return;
+    }
+
     if (username.empty()) {
         window->set_error_info("用户名不能为空");
         return;
@@ -249,6 +259,21 @@ void LoginWindow::btn_signup_clicked(GtkWidget *widget, gpointer data) {
     std::string username = gtk_entry_get_text(GTK_ENTRY(Utils::find_child(window->widget(), "entry_signup_username")));
     std::string password = gtk_entry_get_text(GTK_ENTRY(Utils::find_child(window->widget(), "entry_signup_pw")));
     std::string cfm_password = gtk_entry_get_text(GTK_ENTRY(Utils::find_child(window->widget(), "entry_signup_cfm_pw")));
+
+    if (!Utils::check_valid_string(username)) {
+        window->set_error_info("字段必须为数字、大小写字母、下划线");
+        return;
+    }
+
+    if (!Utils::check_valid_string(password)) {
+        window->set_error_info("字段必须为数字、大小写字母、下划线");
+        return;
+    }
+
+    if (!Utils::check_valid_string(cfm_password)) {
+        window->set_error_info("字段必须为数字、大小写字母、下划线");
+        return;
+    }
 
     if (password != cfm_password) {
         window->set_error_info("密码与确认密码不一致!");

@@ -30,6 +30,8 @@ public:
     static GdkPixbuf * create_round_dot_pix(int size, int r, int g, int b);
 
     static int parse_recv_file(const char *buf, json &recv_msg);
+
+    static int check_valid_string(str text);
 };
 
 

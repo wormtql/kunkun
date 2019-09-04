@@ -160,3 +160,16 @@ int Utils::parse_recv_file(const char *buf, json &recv_msg) {
 
     return len;
 }
+
+int Utils::check_valid_string(const std::string &text) {
+    bool flag = true;
+    for (const char c : text) {
+        bool valid = (c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
+        if (valid == false) {
+            flag = false;
+            break;
+        }
+    }
+
+    return flag;
+}
