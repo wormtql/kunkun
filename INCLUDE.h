@@ -27,6 +27,7 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <mysql/mysql.h>
+#include <sys/stat.h>
 
 #include "json.hpp"
 

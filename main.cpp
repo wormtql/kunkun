@@ -37,6 +37,11 @@ static void activate(GtkApplication * app, gpointer data) {
 
 int main(int argc, char * argv[]) {
 
+    // create file directory
+    if (access("files", 0) != 0) {
+        mkdir("files", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+    }
+
     // init client socket
     Client::getIns()->initialize_net();
 
