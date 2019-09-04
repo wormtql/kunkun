@@ -113,6 +113,9 @@ public:
 
 
     void set_parent_window(GtkWidget * window);
+
+
+    void mark_all_new_msg();
 };
 
 

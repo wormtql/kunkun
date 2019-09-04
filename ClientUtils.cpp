@@ -378,7 +378,7 @@ void ClientUtils::send_file_begin(const std::string &filename,
     Thread::stop_recv();
 
     json j;
-    j["command"] = "chat_send_file_begin";
+    j["command"] = "send_file_begin";
 //    j["from"] = from;
 //    j["to"] = to;
     j["filename"] = filename;
@@ -389,7 +389,7 @@ void ClientUtils::send_file_begin(const std::string &filename,
 
     Thread::resume_recv();
 
-    callback(buf);
+    callback(buf, -1);
 }
 
 void ClientUtils::chat_send_file(const std::string &file_id, str from, str to, bool eof, char * content, int size) {
@@ -400,6 +400,7 @@ void ClientUtils::chat_send_file(const std::string &file_id, str from, str to, b
     j["eof"] = eof;
     j["from"] = from;
     j["to"] = to;
+    j["fileid"] = file_id;
 //    j["size"] = size;
 //    j["content"] = content;
 
@@ -412,6 +413,32 @@ void ClientUtils::chat_send_file(const std::string &file_id, str from, str to, b
 //    Client::getIns()->send_string(j.dump());
 
     Client::getIns()->send_char_arr(sbuf, size + d.size());
+
+    Client::getIns()->recv_blocked(buf);
+
+    Thread::resume_recv();
+}
+
+void ClientUtils::group_send_file(str fileid, const std::string &from, const std::string &group_id, bool eof, char *content,
+                                  int size) {
+    Thread::stop_recv();
+
+    json j;
+    j["command"] = "group_send_file";
+    j["eof"] = eof;
+    j["from"] = from;
+    j["group_id"] = group_id;
+    j["fileid"] = fileid;
+
+    std::string d = j.dump();
+
+    char sbuf[2048] = { 0 };
+    sprintf(sbuf, "%s", d.c_str());
+    memcpy(sbuf + d.size(), content, size);
+
+    Client::getIns()->send_char_arr(sbuf, size + d.size());
+
+    printf("file: %s\n", sbuf);
 
     Client::getIns()->recv_blocked(buf);
 
@@ -443,10 +470,21 @@ void ClientUtils::send_me_a_file(const std::string &fileid) {
     json j;
     j["command"] = "send_me_a_file";
     j["fileid"] = fileid;
+    j["from"] = DataHub::getIns()->username;
 
     Client::getIns()->send_string(j.dump());
 
     Client::getIns()->recv_blocked(buf);
+
+
+    json retj = json::parse(buf);
+
+    std::string filename = retj["filename"];
+    std::string path = "files/" + fileid + "_" + filename;
+
+    FILE * fp = fopen(path.c_str(), "wb");
+    fclose(fp);
+
 
     Thread::resume_recv();
 }
@@ -642,6 +680,26 @@ json ClientUtils::create_group(const std::string &who, const std::string &group_
     j["command"] = "create_group";
     j["who"] = who;
     j["group_name"] = group_name;
+
+    Client::getIns()->send_string(j.dump());
+
+//    char buf[CLIENT_BUF_SIZE];
+    Client::getIns()->recv_blocked(buf);
+
+
+    Thread::resume_recv();
+
+
+    return json::parse(buf);
+}
+
+json ClientUtils::ls_unread_msg(const std::string &who) {
+    Thread::stop_recv();
+
+    json j;
+    j["command"] = "ls_unread_msg";
+    j["username"] = who;
+//    j["group_name"] = group_name;
 
     Client::getIns()->send_string(j.dump());
 

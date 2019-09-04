@@ -9,7 +9,7 @@
 
 const char Client::server_ip[20] = "127.0.0.1";
 const int Client::SERVER_PORT = 1234;
-const int Client::BUFSIZE = 2000;
+const int Client::BUFSIZE = 20000;
 
 GMutex Client::ins_mutex;
 Client * Client::ins = nullptr;
@@ -89,15 +89,13 @@ Client::Client(){}
 //    printf("Send \" %s \" to server successfully.\n",msg.c_str());
 //    return 1;
 //}
-/****************************************************
- * Description : receive message from server
- * Prameter    : None
- * Return      : int : 1 success  0 failed
- * Date        : 2019.8.28
- ****************************************************/
-int Client::recv_msg(char * ret) {
 
-//    g_mutex_lock(&recv_mutex);
+
+/*
+ * function: 接收消息，若没有消息也不阻塞
+ *
+ */
+int Client::recv_msg(char * ret) {
 
     memset(buf, 0, sizeof(char) * BUFSIZE);
     int status = (int)recv(sockfd, buf, BUFSIZE, 0);
@@ -118,14 +116,17 @@ int Client::recv_msg(char * ret) {
         return -2;
     }
 
-    strcpy(ret, buf);
+    printf("recv: %s\n", buf);
+    memcpy(ret, buf, status);
 
-//    g_mutex_unlock(&recv_mutex);
-
-    return 1;
+    return status;
 }
 
 
+/**********************************************
+ * Description: 接收消息，若没有消息则阻塞
+ *
+ **********************************************/
 int Client::recv_blocked(char *ret) {
     while (true) {
         memset(buf, 0, sizeof(char) * BUFSIZE);
@@ -145,8 +146,9 @@ int Client::recv_blocked(char *ret) {
         } else {
 
             strcpy(ret, buf);
+            printf("recv block: %s\n", buf);
 
-            return 1;
+            return status;
         }
     }
 }

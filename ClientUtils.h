@@ -128,6 +128,7 @@ public:
     static void chat_send_file(const std::string & file_id, str from, str to, bool eof, char * content, int size);
 
 
+    static void group_send_file(str fileid, str from, str group_id, bool eof, char * content, int size);
 //    static void group_send_file_begin(str from, str group_id, str filename, SocketCallback callback);
 
 
@@ -161,7 +162,7 @@ public:
     static json group_send_msg(const std::string & from, const std::string & group_id, const std::string & msg);
 
 
-
+    static json ls_unread_msg(str who);
 
 //    static json chat_send_file_begin(const std::string & sender, const std::string & recipient, const std::string & filename, SocketCallback callback);
 

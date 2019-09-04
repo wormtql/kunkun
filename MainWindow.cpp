@@ -40,42 +40,73 @@ MainWindow::MainWindow() {
 
     MainWindow::on_button_user_clicked(nullptr, this);
 
+    GMainContext * context = g_main_context_get_thread_default();
 
+    Thread::set_call_back("recv_file", [this, context] (char * data, int size) {
 
-    Thread::set_call_back("recv_file", [this] (str data) {
+        json j;
 
-        json j = json::parse(data);
-
-//        cout << "file recv: " + data + "\n";
+        int jsize = Utils::parse_recv_file(data, j);
 
         cout << "file recv\n";
+        cout << j << std::endl;
 
-        ofstream file((string)j["filename"] + "_" + (string)j["fileid"], std::ios::app);
-        file << (string)j["content"];
+        std::string filename = j["filename"];
+        std::string fileid = j["fileid"];
+        bool eof = j["eof"];
 
-        if (j["eof"]) {
-            GtkWidget * lbl = gtk_label_new(("文件：" + (string)j["filename"] + " 接收完成").c_str());
-            gtk_widget_set_name(lbl, "top_label");
+        ofstream file("files/" + fileid + "_" + filename, std::ios::app | std::ios::binary);
+        file.write(data + jsize, size - jsize);
+        file.close();
+        printf("size:%d %d\n", size, jsize);
+        if (eof) {
 
-            gtk_box_pack_start(GTK_BOX(this->top_bar), lbl, TRUE, TRUE, 0);
-            gtk_widget_show_all(lbl);
+            Data * da = new Data;
+            da->context = context;
+            da->window = this;
+            da->msg = "文件：" + (string)j["filename"] + " 接收完成";
 
-            g_timeout_add(5000, [] (gpointer data) -> gboolean {
+            g_main_context_invoke(context, [] (gpointer user_data) -> gboolean {
 
-                gtk_widget_destroy((GtkWidget *)data);
+                auto d = (Data *)user_data;
+                auto window = d->window;
+
+                GtkWidget * prev = Utils::find_child(window->top_bar, "top_label");
+                if (prev) {
+                    gtk_widget_destroy(prev);
+                }
+
+                GtkWidget * lbl = gtk_label_new(d->msg.c_str());
+                gtk_widget_set_name(lbl, "top_label");
+
+                gtk_box_pack_start(GTK_BOX(window->top_bar), lbl, TRUE, TRUE, 0);
+                gtk_widget_show_all(lbl);
+
+                g_timeout_add(5000, [] (gpointer data) -> gboolean {
+
+
+                    if (GTK_IS_WIDGET(data)) {
+                        gtk_widget_destroy((GtkWidget *)data);
+                    }
+
+                    return false;
+                }, lbl);
 
                 return false;
-            }, lbl);
+
+            }, da);
         }
 
     });
 
-    GMainContext * context = g_main_context_get_thread_default();
 //    Data * data = new Data;
 //    data->context = context;
 //    data->widget = lbl;
 
-    Thread::set_call_back("recv_sys_msg", [this, context] (str data) {
+    Thread::set_call_back("recv_sys_msg", [this, context] (char * da, int size) {
+
+        std::string data = da;
+
         json j = json::parse(data);
 
         cout << "sys msg: " + (string)j["msg"] << "\n";
@@ -221,6 +252,7 @@ void MainWindow::on_button_friend_clicked(GtkWidget *widget, gpointer data) {
     json groups = ClientUtils::get_groups(DataHub::getIns()->username);
 
     window->chat_panel->refresh_friends_list(friends, groups);
+    window->chat_panel->mark_all_new_msg();
 
     window->current_page = window->chat_panel->widget();
     gtk_widget_show_all(window->current_page);

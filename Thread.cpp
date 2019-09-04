@@ -10,11 +10,11 @@ using std::string;
 
 char Thread::buf[20000] = { 0 };
 pthread_t Thread::id = 0;
-SocketCallback Thread::default_cb = [] (const std::string & data) {};
-SocketCallback Thread::chat_recv_msg_cb = [] (const std::string & data) {};
-SocketCallback Thread::group_recv_msg_cb = [] (const std::string & data) {};
-SocketCallback Thread::recv_sys_msg_cb = [] (const std::string & data) {};
-SocketCallback Thread::recv_file_cb = [] (const std::string & data) {};
+SocketCallback Thread::default_cb = [] (char * data, int size) {};
+SocketCallback Thread::chat_recv_msg_cb = [] (char * data, int size) {};
+SocketCallback Thread::group_recv_msg_cb = [] (char * data, int size) {};
+SocketCallback Thread::recv_sys_msg_cb = [] (char * data, int size) {};
+SocketCallback Thread::recv_file_cb = [] (char * data, int size) {};
 //int Thread::lock = 0;
 GMutex Thread::mutex;
 
@@ -26,45 +26,51 @@ void * Thread::service_func(void *) {
 
         g_mutex_lock(&mutex);
 
-        memset(buf, 0, sizeof(buf));
+        memset(buf, 0, sizeof(char) * 20000);
         int status = Client::getIns()->recv_msg(buf);
 
         if (status == -1) {
             // error
-
+            printf("error\n");
             g_mutex_unlock(&mutex);
             break;
         } else if (status == 0) {
             // no message
-
+//            printf("no message\n");
             g_mutex_unlock(&mutex);
             continue;
         } else if (status == -2) {
             // connection break
-
+            printf("disconnect\n");
             g_mutex_unlock(&mutex);
             break;
         }
 
+        printf("**********************\n");
         printf("buf: %s\n", buf);
+        printf("**********************\n");
 
 
 //        callback(buf);
 
-        json retj = json::parse(buf);
+//        json retj = json::parse(buf);
+//        std::string cmd = retj["command"];
+
+        json retj;
+        int jsize = Utils::parse_recv_file(buf, retj);
         std::string cmd = retj["command"];
 
         if (cmd == "chat_recv_msg") {
-            chat_recv_msg_cb(buf);
+            chat_recv_msg_cb(buf, status);
         } else if (cmd == "group_recv_msg") {
-            group_recv_msg_cb(buf);
+            group_recv_msg_cb(buf, status);
         } else if (cmd == "recv_sys_msg") {
-            recv_sys_msg_cb(buf);
+            recv_sys_msg_cb(buf, status);
         } else if (cmd == "recv_file") {
-            recv_file_cb(buf);
+            recv_file_cb(buf, status);
         }
 
-
+//        printf("aaa\n");
         // release lock
 //        lock = 0;
         g_mutex_unlock(&mutex);

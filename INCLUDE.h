@@ -31,13 +31,12 @@
 #include "json.hpp"
 
 
-typedef std::function<void (const std::string &)> SocketCallback;
+typedef std::function<void (char *, int size)> SocketCallback;
 typedef std::function<void (double)> FileSendCallback;
 typedef const std::string & str;
 
 
 #include "DataHub.h"
-#include "Utils.h"
 #include "CssLoader.h"
 #include "LoginWindow.h"
 #include "Client.h"
@@ -47,6 +46,7 @@ typedef const std::string & str;
 #include "ConsolePanel.h"
 #include "MainWindow.h"
 #include "ClientUtils.h"
+#include "Utils.h"
 #include "Thread.h"
 #include "SendFileUtils.h"
 

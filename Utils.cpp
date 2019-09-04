@@ -125,3 +125,38 @@ GtkWidget* Utils::create_image_from_file_at_size(const std::string &file, int wi
 
     return gtk_image_new_from_pixbuf(pix);
 }
+
+GdkPixbuf* Utils::create_round_dot_pix(int size, int r, int g, int b) {
+    cairo_surface_t * surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, size, size);
+    cairo_t * cr = cairo_create(surface);
+
+
+    cairo_set_source_rgb(cr, r / 255.0, g / 255.0, b / 255.0);
+    cairo_arc(cr, size / 2, size / 2, size / 2, 0, 2 * M_PI);
+    cairo_fill(cr);
+
+    return gdk_pixbuf_get_from_surface(surface, 0, 0, size, size);
+}
+
+int Utils::parse_recv_file(const char *buf, json &recv_msg) {
+    int len = 0;
+    int flag = 0;
+    for(len = 0; ; len++ )
+    {
+        if( buf[len] == '{' ) flag ++;
+        else if( buf[len] == '}' ) flag --;
+        if( !flag ) break;
+    }
+    len++;
+//    char tmp[20000];
+//    char tp = buf[len];
+//    buf[len] = "\0";
+//    buf[len] = '\0';
+//    strcpy(tmp, buf);
+//    buf[len] = tp;
+//    recv_msg = json::parse( tmp );
+
+    recv_msg = json::parse(buf, buf + len);
+
+    return len;
+}

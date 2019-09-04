@@ -72,6 +72,7 @@ using std::ifstream;
 //    }, data);
 //}
 
+// filename is full path
 void SendFileUtils::chat_send_file(const std::string &from, const std::string &to, const std::string &filename,
                                    const std::string &fileid, FileSendCallback callback) {
     Data * data = new Data;
@@ -81,19 +82,56 @@ void SendFileUtils::chat_send_file(const std::string &from, const std::string &t
     data->from = from;
     data->to = to;
     data->filename = filename;
+//
+//    g_thread_new("send_file_thread", [] (void * user_data) -> void * {
+//
+//        auto d = (Data *)user_data;
+//
+//        ifstream file(d->filename);
+//        file.seekg(0, std::ios::end);
+//        int total_byte = (int)file.tellg();
+//        file.seekg(0);
+//
+//        char * buf = new char[1024];
+//
+//        int sent_byte = 0;
+//        while (true)
+//        {
+//            memset(buf, 0, sizeof(char) * 1024);
+//            file.read(buf, 1024);
+//
+//            bool eof = file.eof();
+//
+//            int read_byte = eof ? total_byte % 1024 : 1024;
+//
+//            sent_byte += read_byte;
+//
+//            ClientUtils::chat_send_file(d->fileid, d->from, d->to, eof, buf, read_byte);
+//
+//            d->callback(1.0 * sent_byte / total_byte);
+//
+//            if (eof) {
+//                break;
+//            }
+//        }
+//
+//        file.close();
+//
+//        delete[] buf;
+//
+//        printf("send_file_complete\n");
+//
+//    }, data);
+
 
     g_idle_add([] (gpointer user_data) -> gboolean {
 
         auto d = (Data *)user_data;
 
         ifstream file(d->filename);
-
         file.seekg(0, std::ios::end);
-
         int total_byte = (int)file.tellg();
-
         file.seekg(0);
-
 
         char * buf = new char[1024];
 
@@ -103,20 +141,15 @@ void SendFileUtils::chat_send_file(const std::string &from, const std::string &t
             memset(buf, 0, sizeof(char) * 1024);
             file.read(buf, 1024);
 
-            sent_byte += 1024;
-
-//        printf("worm\n");
-
             bool eof = file.eof();
 
             int read_byte = eof ? total_byte % 1024 : 1024;
-//            ClientUtils::chat_send_file(data->fileid, eof, buf);
+
+            sent_byte += read_byte;
+
             ClientUtils::chat_send_file(d->fileid, d->from, d->to, eof, buf, read_byte);
 
-
-
             d->callback(1.0 * sent_byte / total_byte);
-//        sleep(500);
 
             if (eof) {
                 break;
@@ -125,8 +158,73 @@ void SendFileUtils::chat_send_file(const std::string &from, const std::string &t
 
         file.close();
 
+        delete[] buf;
+
         printf("send_file_complete\n");
+
+        return false;
 
 
     }, data);
+}
+
+void SendFileUtils::group_send_file(const std::string &from, const std::string &group_id, str filename, const std::string &fileid,
+                                    FileSendCallback callback) {
+    Data * data = new Data;
+
+    data->fileid = fileid;
+    data->callback = callback;
+    data->from = from;
+    data->to = group_id;
+    data->filename = filename;
+
+
+    g_idle_add([] (gpointer user_data) -> gboolean {
+        auto d = (Data *)user_data;
+
+        ifstream file(d->filename);
+        file.seekg(0, std::ios::end);
+        int total_byte = (int)file.tellg();
+        file.seekg(0);
+
+        char * buf = new char[1024];
+
+        int sent_byte = 0;
+        while (true)
+        {
+            memset(buf, 0, sizeof(char) * 1024);
+            file.read(buf, 1024);
+
+
+
+            bool eof = file.eof();
+
+            int read_byte = eof ? total_byte % 1024 : 1024;
+
+            sent_byte += read_byte;
+
+//            ClientUtils::chat_send_file(d->fileid, d->from, d->to, eof, buf, read_byte);
+            ClientUtils::group_send_file(d->fileid, d->from, d->to, eof, buf, read_byte);
+
+            d->callback(1.0 * sent_byte / total_byte);
+
+            if (eof) {
+                break;
+            }
+        }
+
+        file.close();
+
+        delete[] buf;
+
+        printf("send_file_complete\n");
+
+        return false;
+    }, data);
+
+//    g_thread_new("send_file_thread", [] (void * user_data) -> void * {
+//
+//
+//
+//    }, data);
 }

@@ -179,5 +179,14 @@
 }
 
 #chat_panel .new_msg {
-    background: linear-gradient(45deg, crimson, #ff7640);
+    /*background: linear-gradient(45deg, crimson, #ff7640);*/
+    /*box-shadow: crimson 0 0 1px 10px;*/
 }
+
+/*#chat_panel .new_msg_label {*/
+    /*min-width: 10px;*/
+    /*min-height: 10px;*/
+    /*background: red;*/
+    /*margin: 25px 20px;*/
+    /*border-radius: 50%;*/
+/*}*/

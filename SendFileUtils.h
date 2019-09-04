@@ -21,7 +21,7 @@ private:
 public:
     static void chat_send_file(str from, str to, str filename, str fileid, FileSendCallback callback);
 
-    static void group_send_file(str from, str group_id, str fileid, FileSendCallback callback);
+    static void group_send_file(str from, str group_id, str filename, str fileid, FileSendCallback callback);
 };
 
 

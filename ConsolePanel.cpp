@@ -220,6 +220,70 @@ void ConsolePanel::process_command(const std::string &cmd) {
             }
         }
     }
+    else if (argv[0] == "help") {
+        my_print(R"(del
+    group
+        [group_id]
+        [group_name]
+    friend
+        [username]
+
+set
+    username
+        [new_value]
+    sign
+        [new_value]
+    gender
+        [new_value]
+
+get
+    username
+    sign
+    gender
+
+ls
+    group
+        group_id
+        group_name
+    friend
+        friend_name
+    request
+        f-req
+        g-inv
+        g-req
+
+msg
+    group
+        group_id
+            msg
+    friend
+        friend_id
+            msg
+
+req
+    add
+        friend
+            username
+        group
+            group_id
+
+res
+    [true | false]
+        f-req
+            username
+        g-inv
+            group_id
+        g-req
+            username
+                group_id
+
+create
+    group
+        name
+
+
+clear\n)");
+    }
     else
     {
         my_print("unrecognized command " + argv[0] + "\n");
