@@ -242,7 +242,15 @@ int Client::initialize_net() {
     pin_addr.sin_family = AF_INET;
     pin_addr.sin_port = htons(SERVER_PORT);
 //    pin_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    pin_addr.sin_addr.s_addr = htonl(change(server_ip));
+
+    char buf[100] = { 0 };
+    std::ifstream file("../ip");
+    file.getline(buf, 100);
+
+    std::cout << buf << std::endl;
+
+//    pin_addr.sin_addr.s_addr = htonl(change(server_ip));
+    pin_addr.sin_addr.s_addr = htonl(change(buf));
 
     this->sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (this->sockfd == -1) {
