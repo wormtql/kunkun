@@ -275,6 +275,16 @@ void LoginWindow::btn_signup_clicked(GtkWidget *widget, gpointer data) {
         return;
     }
 
+    if (username.empty()) {
+        window->set_error_info("用户名不能为空");
+        return;
+    }
+
+    if (password.empty() || cfm_password.empty()) {
+        window->set_error_info("密码不能为空");
+        return;
+    }
+
     if (password != cfm_password) {
         window->set_error_info("密码与确认密码不一致!");
         return;

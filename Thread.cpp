@@ -18,6 +18,12 @@ SocketCallback Thread::recv_file_cb = [] (char * data, int size) {};
 //int Thread::lock = 0;
 GMutex Thread::mutex;
 
+
+/*
+ * 功能：接收服务器端的推送信息
+ * 参数：无
+ * 返回值：无
+ */
 void * Thread::service_func(void *) {
     printf("thread start\n");
 
@@ -83,22 +89,38 @@ void * Thread::service_func(void *) {
 //    return &ins;
 //}
 
+/*
+ * 初始化接收线程
+ *
+ */
 void Thread::init() {
 //    mutex = new GMutex;
     g_mutex_init(&mutex);
     g_thread_new("worm", Thread::service_func, nullptr);
 }
 
+/*
+ * 断开线程
+ *
+ */
 void Thread::kill() {
     exit(0);
 }
 
+/*
+ * 暂停接收
+ *
+ */
 void Thread::stop_recv() {
 //    while (lock == 1);
 //    lock = 1;
     g_mutex_lock(&mutex);
 }
 
+/*
+ *
+ *
+ */
 void Thread::resume_recv() {
 //    lock = 0;
     g_mutex_unlock(&mutex);

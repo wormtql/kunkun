@@ -282,7 +282,8 @@ create
         name
 
 
-clear\n)");
+clear)");
+        my_print("\n");
     }
     else
     {

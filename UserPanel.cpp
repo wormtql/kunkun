@@ -133,7 +133,7 @@ int UserPanel::on_sign_enter(GtkWidget *widget, gpointer data) {
 
     if (GTK_IS_ENTRY(panel->entry_sign)) {
         std::string val = gtk_entry_get_text(GTK_ENTRY(panel->entry_sign));
-        ClientUtils::alter_user_info(DataHub::getIns()->username, "sign", val);
+        ClientUtils::alter_user_info(DataHub::getIns()->username, "signature", val);
 
     }
 
