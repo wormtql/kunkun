@@ -11,7 +11,25 @@
 const char Client::server_ip[20] = "10.194.139.213";
 const int Client::SERVER_PORT = 1234;
 const int Client::BUFSIZE = 20000;
-
+unsigned change(const char *s)
+{
+    unsigned tmp=0;
+    unsigned res = 0;
+    int cnt=0;
+    for(int i=0;s[i];i++)
+    {
+        if(s[i]=='.')
+        {
+            res+=tmp;
+            res*=256;
+            tmp=0;
+        } else{
+            tmp=tmp*10+s[i]-'0';
+        }
+    }
+    res+=tmp;
+    return res;
+}
 GMutex Client::ins_mutex;
 Client * Client::ins = nullptr;
 
@@ -223,7 +241,8 @@ int Client::initialize_net() {
 
     pin_addr.sin_family = AF_INET;
     pin_addr.sin_port = htons(SERVER_PORT);
-    pin_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+//    pin_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    pin_addr.sin_addr.s_addr = htonl(change(server_ip));
 
     this->sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (this->sockfd == -1) {
